@@ -41,3 +41,36 @@ const std::vector<ServerConfig>& Config::getServers() const {
     return servers;
 }
 
+std::vector<std::string> Config::tokenize(const std::string& content) {
+  std::vector<std::string> tokens;
+  std::string token;
+  bool in_quotes = false;
+
+  for (size_t i = 0; i < content.length(); ++i) {
+    char c = content[i];
+    if (c == '#' && !in_quotes) { // ignore comments
+      while (i < content.length() && content[i] != '\n')
+        ++i;
+      continue;
+    }
+    if (c == '"') { // quotes
+      in_quotes = !in_quotes;
+      continue;
+    }
+    if (!in_quotes && (isspace(c) || c == '{' || c == '}' || c == ';')) { // delimiters
+      if (!token.empty()) { // end of a token
+        tokens.push_back(token);
+        token.clear();
+      }
+      if (c == '{' || c == '}' || c == ';') { // single char tokens
+        tokens.push_back(std::string(1, c));
+      }
+    } else {
+      token += c;
+    }
+  }
+  if (!token.empty()) { // last token
+    tokens.push_back(token);
+  }
+  return tokens;
+}
