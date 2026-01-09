@@ -15,6 +15,8 @@ struct LocationConfig {
   bool upload_enabled;
   std::string upload_store;
   std::map<std::string, std::string> cgi_pass;
+
+  LocationConfig();
 };
 
 struct ServerConfig {
@@ -23,6 +25,8 @@ struct ServerConfig {
   std::map<std::string, std::string> error_pages;
   std::string server_name;
   size_t client_max_body_size;
+
+  ServerConfig();
 };
 
 class Config {
