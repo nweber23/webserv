@@ -43,6 +43,7 @@ class Config {
     class ConfigException : public std::exception {
       public:
         ConfigException();
+        ConfigException(const std::string& msg);
         ConfigException(const ConfigException& other);
         ConfigException& operator=(const ConfigException& other);
         virtual ~ConfigException();
@@ -61,7 +62,7 @@ class Config {
     std::vector<std::string> tokenize(const std::string& content);
     void validateConfig() const;
 
-    std::string getNextToken(const std::string& line, size_t& pos) const;
-    void expectToken(std::vector<std::string>& tokens, size_t& index, const std::string& expected) const;
+    std::string getNextToken(std::vector<std::string>& tokens, size_t& pos);
+    void expectToken(std::vector<std::string>& tokens, size_t& index, const std::string& expected);
     size_t parseSize(const std::string& str);
 };

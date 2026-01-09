@@ -74,3 +74,53 @@ std::vector<std::string> Config::tokenize(const std::string& content) {
   }
   return tokens;
 }
+
+void Config::parseFile(const std::string& config_file) {
+  std::ifstream file(config_file);
+  if (!file.is_open())
+    throw ConfigException("Could not open config file: " + config_file);
+
+  std::stringstream buffer;
+  buffer << file.rdbuf();
+  std::string content = buffer.str();
+  file.close();
+
+  std::vector<std::string> tokens = tokenize(content);
+  size_t index = 0;
+  while (index < tokens.size()) {
+    if (tokens[index] == "server") {
+      parseServerBlock(tokens, index);
+    } else {
+      throw ConfigException("Unexpected token: " + tokens[index]);
+    }
+  }
+}
+
+std::string Config::getNextToken(std::vector<std::string>& tokens, size_t& pos){
+  if (pos >= tokens.size())
+    throw ConfigException("Unexpected end of configuration");
+  return tokens[pos++];
+}
+
+void Config::expectToken(std::vector<std::string>& tokens, size_t& index, const std::string& expected) {
+  std::string token = getNextToken(tokens, index);
+  if (token != expected)
+    throw ConfigException("Expected token: '" + expected + "', got: '" + token + "'");
+}
+
+size_t Config::parseSize(const std::string& str) {
+  size_t value;
+  char unit = 0;
+  std::stringstream ss(str);
+
+  ss >> value;
+  if (!ss.eof())
+    ss >> unit;
+
+  switch (unit) {
+    case 'K' : case 'k' : return value * 1024;
+    case 'M' : case 'm' : return value * 1024 * 1024;
+    case 'G' : case 'g' : return value * 1024 * 1024 * 1024;
+    default : return value;
+  }
+}
