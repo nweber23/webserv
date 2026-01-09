@@ -57,8 +57,8 @@ class Config {
     std::string configFile;
 
     void parseFile(const std::string& config_file);
-    void parseServerBlock(const std::vector<std::string>& lines, size_t& index);
-    void parseLocationBlock(const std::vector<std::string>& lines, size_t& index, ServerConfig& server);
+    void parseServerBlock(std::vector<std::string>& lines, size_t& index);
+    void parseLocationBlock(std::vector<std::string>& lines, size_t& index, ServerConfig& server);
     std::vector<std::string> tokenize(const std::string& content);
     void validateConfig() const;
 

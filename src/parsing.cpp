@@ -124,3 +124,119 @@ size_t Config::parseSize(const std::string& str) {
     default : return value;
   }
 }
+
+void Config::parseServerBlock(std::vector<std::string>& tokens, size_t& index) {
+  ServerConfig server;
+
+  ++index; // skip 'server'
+  expectToken(tokens, index, "{");
+
+  while (index < tokens.size() && tokens[index] != "}") {
+    std::string directive = getNextToken(tokens, index);
+
+    if (directive == "listen") { // listen ports
+      std::string port = getNextToken(tokens, index);
+      server.listen_ports.push_back(port);
+      expectToken(tokens, index, ";");
+    } else if (directive == "server_name") { // server name
+      server.server_name = getNextToken(tokens, index);
+      expectToken(tokens, index, ";");
+    } else if (directive == "error_page") { // error pages
+      std::vector<int> codes;
+      while (index < tokens.size() && tokens[index] != ";") {
+        std::string token = tokens[index];
+        if (token[0] >= '0' && token[0] <= '9') {
+          codes.push_back(std::atoi(token.c_str()));
+          ++index;
+        } else {
+          break;
+        }
+    }
+    std::string page = getNextToken(tokens, index);
+    for (size_t i = 0; i < codes.size(); ++i) {
+      server.error_pages[std::to_string(codes[i])] = page;
+    }
+    expectToken(tokens, index, ";");
+  } else if (directive== "client_max_bodz_size") { // client max body size
+    std::string size_str = getNextToken(tokens, index);
+    server.client_max_body_size = parseSize(size_str);
+    expectToken(tokens, index, ";");
+  } else if (directive == "location") { // location block
+    parseLocationBlock(tokens, index, server);
+  } else {
+    throw ConfigException("Unknown directive in server block: " + directive);
+  }
+  expectToken(tokens, index, "}");
+  servers.push_back(server);
+  }
+}
+
+void Config::parseLocationBlock(std::vector<std::string>& lines, size_t& index, ServerConfig& server) {
+  LocationConfig location;
+
+  std::string path = getNextToken(lines, index);
+  location.path = path;
+  expectToken(lines, index, "{");
+
+  while (index < lines.size() && lines[index] != "}") {
+    std::string directive = getNextToken(lines, index);
+
+    if (directive == "root") { // root directive
+      location.root = getNextToken(lines, index);
+      expectToken(lines, index, ";");
+    } else if (directive == "index") { // index files
+      while (index < lines.size() && lines[index] != ";") {
+        location.index.push_back(getNextToken(lines, index));
+      }
+      expectToken(lines, index, ";");
+    } else if (directive == "allowed_methods") { // allowed methods
+      while (index < lines.size() && lines[index] != ";") {
+        location.allowed_methods.push_back(getNextToken(lines, index));
+      }
+      expectToken(lines, index, ";");
+    } else if (directive == "autoindex") { // autoindex
+      std::string value = getNextToken(lines, index);
+      location.autoindex = (value == "on");
+      expectToken(lines, index, ";");
+    } else if (directive == "redirect") { // redirect
+      location.redirect_code = std::atoi(getNextToken(lines, index).c_str());
+      location.redirect_url = getNextToken(lines, index);
+      expectToken(lines, index, ";");
+    } else if (directive == "upload_enable") { // upload enable
+      std::string value = getNextToken(lines, index);
+      location.upload_enabled = (value == "on");
+      expectToken(lines, index, ";");
+    } else if (directive == "upload_store") { // upload store
+      location.upload_store = getNextToken(lines, index);
+      expectToken(lines, index, ";");
+    } else if (directive == "cgi_pass") { // cgi pass
+      std::string extension = getNextToken(lines, index);
+      std::string path = getNextToken(lines, index);
+      location.cgi_pass[extension] = path;
+      expectToken(lines, index, ";");
+    } else {
+      throw ConfigException("Unknown directive in location block: " + directive);
+    }
+  }
+  expectToken(lines, index, "}");
+  server.locations.push_back(location);
+}
+
+void Config::validateConfig() const {
+  if (servers.empty())
+    throw ConfigException("No server blocks defined in configuration");
+
+  for (size_t i = 0; i < servers.size(); ++i) {
+    const ServerConfig& server = servers[i];
+    if (server.listen_ports.empty())
+      throw ConfigException("Server block missing 'listen' directive");
+
+    for (size_t j = 0; j < server.locations.size(); ++j) {
+      const LocationConfig& location = server.locations[j];
+      if (location.path.empty())
+        throw ConfigException("Location block missing path");
+      if (location.root.empty())
+        throw ConfigException("Location block missing 'root' directive for path: " + location.path);
+    }
+  }
+}
