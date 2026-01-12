@@ -48,28 +48,28 @@ std::vector<std::string> Config::tokenize(const std::string& content) {
 
   for (size_t i = 0; i < content.length(); ++i) {
     char c = content[i];
-    if (c == '#' && !in_quotes) { // ignore comments
+    if (c == '#' && !in_quotes) {
       while (i < content.length() && content[i] != '\n')
         ++i;
       continue;
     }
-    if (c == '"') { // quotes
+    if (c == '"') {
       in_quotes = !in_quotes;
       continue;
     }
-    if (!in_quotes && (isspace(c) || c == '{' || c == '}' || c == ';')) { // delimiters
-      if (!token.empty()) { // end of a token
+    if (!in_quotes && (isspace(c) || c == '{' || c == '}' || c == ';')) {
+      if (!token.empty()) {
         tokens.push_back(token);
         token.clear();
       }
-      if (c == '{' || c == '}' || c == ';') { // single char tokens
+      if (c == '{' || c == '}' || c == ';') {
         tokens.push_back(std::string(1, c));
       }
     } else {
       token += c;
     }
   }
-  if (!token.empty()) { // last token
+  if (!token.empty()) {
     tokens.push_back(token);
   }
   return tokens;
@@ -128,20 +128,20 @@ size_t Config::parseSize(const std::string& str) {
 void Config::parseServerBlock(std::vector<std::string>& tokens, size_t& index) {
   ServerConfig server;
 
-  ++index; // skip 'server'
+  ++index;
   expectToken(tokens, index, "{");
 
   while (index < tokens.size() && tokens[index] != "}") {
     std::string directive = getNextToken(tokens, index);
 
-    if (directive == "listen") { // listen ports
+    if (directive == "listen") {
       std::string port = getNextToken(tokens, index);
       server.listen_ports.push_back(port);
       expectToken(tokens, index, ";");
-    } else if (directive == "server_name") { // server name
+    } else if (directive == "server_name") {
       server.server_name = getNextToken(tokens, index);
       expectToken(tokens, index, ";");
-    } else if (directive == "error_page") { // error pages
+    } else if (directive == "error_page") {
       std::vector<int> codes;
       while (index < tokens.size() && tokens[index] != ";") {
         std::string token = tokens[index];
@@ -151,24 +151,25 @@ void Config::parseServerBlock(std::vector<std::string>& tokens, size_t& index) {
         } else {
           break;
         }
+      }
+      std::string page = getNextToken(tokens, index);
+      for (size_t i = 0; i < codes.size(); ++i) {
+        server.error_pages[std::to_string(codes[i])] = page;
+      }
+      expectToken(tokens, index, ";");
+    } else if (directive == "client_max_body_size") {
+      std::string size_str = getNextToken(tokens, index);
+      server.client_max_body_size = parseSize(size_str);
+      expectToken(tokens, index, ";");
+    } else if (directive == "location") {
+      parseLocationBlock(tokens, index, server);
+    } else {
+      throw ConfigException("Unknown directive in server block: " + directive);
     }
-    std::string page = getNextToken(tokens, index);
-    for (size_t i = 0; i < codes.size(); ++i) {
-      server.error_pages[std::to_string(codes[i])] = page;
-    }
-    expectToken(tokens, index, ";");
-  } else if (directive== "client_max_bodz_size") { // client max body size
-    std::string size_str = getNextToken(tokens, index);
-    server.client_max_body_size = parseSize(size_str);
-    expectToken(tokens, index, ";");
-  } else if (directive == "location") { // location block
-    parseLocationBlock(tokens, index, server);
-  } else {
-    throw ConfigException("Unknown directive in server block: " + directive);
   }
+
   expectToken(tokens, index, "}");
   servers.push_back(server);
-  }
 }
 
 void Config::parseLocationBlock(std::vector<std::string>& lines, size_t& index, ServerConfig& server) {
@@ -181,35 +182,35 @@ void Config::parseLocationBlock(std::vector<std::string>& lines, size_t& index, 
   while (index < lines.size() && lines[index] != "}") {
     std::string directive = getNextToken(lines, index);
 
-    if (directive == "root") { // root directive
+    if (directive == "root") {
       location.root = getNextToken(lines, index);
       expectToken(lines, index, ";");
-    } else if (directive == "index") { // index files
+    } else if (directive == "index") {
       while (index < lines.size() && lines[index] != ";") {
         location.index.push_back(getNextToken(lines, index));
       }
       expectToken(lines, index, ";");
-    } else if (directive == "allowed_methods") { // allowed methods
+    } else if (directive == "allowed_methods") {
       while (index < lines.size() && lines[index] != ";") {
         location.allowed_methods.push_back(getNextToken(lines, index));
       }
       expectToken(lines, index, ";");
-    } else if (directive == "autoindex") { // autoindex
+    } else if (directive == "autoindex") {
       std::string value = getNextToken(lines, index);
       location.autoindex = (value == "on");
       expectToken(lines, index, ";");
-    } else if (directive == "redirect") { // redirect
+    } else if (directive == "redirect") {
       location.redirect_code = std::atoi(getNextToken(lines, index).c_str());
       location.redirect_url = getNextToken(lines, index);
       expectToken(lines, index, ";");
-    } else if (directive == "upload_enable") { // upload enable
+    } else if (directive == "upload_enable") {
       std::string value = getNextToken(lines, index);
       location.upload_enabled = (value == "on");
       expectToken(lines, index, ";");
-    } else if (directive == "upload_store") { // upload store
+    } else if (directive == "upload_store") {
       location.upload_store = getNextToken(lines, index);
       expectToken(lines, index, ";");
-    } else if (directive == "cgi_pass") { // cgi pass
+    } else if (directive == "cgi_pass") {
       std::string extension = getNextToken(lines, index);
       std::string path = getNextToken(lines, index);
       location.cgi_pass[extension] = path;
