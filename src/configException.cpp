@@ -15,6 +15,6 @@ Config::ConfigException& Config::ConfigException::operator=(const ConfigExceptio
 
 Config::ConfigException::~ConfigException() {}
 
-const char* Config::ConfigException::what() {
+const char* Config::ConfigException::what() const noexcept {
     return message.c_str();
 }

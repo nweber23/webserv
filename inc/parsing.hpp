@@ -47,7 +47,7 @@ class Config {
         ConfigException(const ConfigException& other);
         ConfigException& operator=(const ConfigException& other);
         virtual ~ConfigException();
-        virtual const char* what();
+        virtual const char* what() const noexcept override;
       private:
         std::string message;
       };
