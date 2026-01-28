@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <functional>
 
 struct LocationConfig {
   std::string path;
@@ -56,13 +57,33 @@ class Config {
     std::vector<ServerConfig> servers;
     std::string configFile;
 
+    typedef void (Config::*ServerDirectiveHandler)(std::vector<std::string>&, size_t&, ServerConfig&);
+    typedef void (Config::*LocationDirectiveHandler)(std::vector<std::string>&, size_t&, LocationConfig&);
+
+    static const std::map<std::string, ServerDirectiveHandler> serverHandlers;
+    static const std::map<std::string, LocationDirectiveHandler> locationHandlers;
+
     void parseFile(const std::string& config_file);
-    void parseServerBlock(std::vector<std::string>& lines, size_t& index);
-    void parseLocationBlock(std::vector<std::string>& lines, size_t& index, ServerConfig& server);
+    void parseServerBlock(std::vector<std::string>& tokens, size_t& index);
+    void parseLocationBlock(std::vector<std::string>& tokens, size_t& index, ServerConfig& server);
     std::vector<std::string> tokenize(const std::string& content);
     void validateConfig() const;
 
     std::string getNextToken(std::vector<std::string>& tokens, size_t& pos);
     void expectToken(std::vector<std::string>& tokens, size_t& index, const std::string& expected);
     size_t parseSize(const std::string& str);
+
+    void handleListen(std::vector<std::string>& tokens, size_t& index, ServerConfig& server);
+    void handleServerName(std::vector<std::string>& tokens, size_t& index, ServerConfig& server);
+    void handleErrorPage(std::vector<std::string>& tokens, size_t& index, ServerConfig& server);
+    void handleClientMaxBodySize(std::vector<std::string>& tokens, size_t& index, ServerConfig& server);
+
+    void handleRoot(std::vector<std::string>& tokens, size_t& index, LocationConfig& location);
+    void handleIndex(std::vector<std::string>& tokens, size_t& index, LocationConfig& location);
+    void handleAllowedMethods(std::vector<std::string>& tokens, size_t& index, LocationConfig& location);
+    void handleAutoindex(std::vector<std::string>& tokens, size_t& index, LocationConfig& location);
+    void handleRedirect(std::vector<std::string>& tokens, size_t& index, LocationConfig& location);
+    void handleUploadEnable(std::vector<std::string>& tokens, size_t& index, LocationConfig& location);
+    void handleUploadStore(std::vector<std::string>& tokens, size_t& index, LocationConfig& location);
+    void handleCgiPass(std::vector<std::string>& tokens, size_t& index, LocationConfig& location);
 };
