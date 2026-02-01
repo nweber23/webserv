@@ -170,6 +170,157 @@ size_t Config::parseSize(const std::string& str) {
   }
 }
 
+// Server directive handlers
+
+void Config::handleListen(std::vector<std::string>& tokens, size_t& index, ServerConfig& server) {
+  std::string port = getNextToken(tokens, index);
+  validatePort(port);
+  server.listen_ports.push_back(port);
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleServerName(std::vector<std::string>& tokens, size_t& index, ServerConfig& server) {
+  std::string name = getNextToken(tokens, index);
+  if (name.empty() || name == ";")
+    throw ConfigException("Empty value for server_name");
+  server.server_name = name;
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleErrorPage(std::vector<std::string>& tokens, size_t& index, ServerConfig& server) {
+  std::vector<int> codes;
+  while (index < tokens.size() && tokens[index] != ";") {
+    std::string token = tokens[index];
+    if (!token.empty() && token[0] >= '0' && token[0] <= '9') {
+      int code = parseInt(token, "error_page code");
+      validateHttpCode(code, "error_page");
+      codes.push_back(code);
+      ++index;
+    } else {
+      break;
+    }
+  }
+  if (codes.empty())
+    throw ConfigException("error_page directive requires at least one status code");
+  std::string page = getNextToken(tokens, index);
+  if (page.empty() || page == ";")
+    throw ConfigException("error_page directive requires a file path");
+  for (size_t i = 0; i < codes.size(); ++i) {
+    server.error_pages[std::to_string(codes[i])] = page;
+  }
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleClientMaxBodySize(std::vector<std::string>& tokens, size_t& index, ServerConfig& server) {
+  std::string size_str = getNextToken(tokens, index);
+  server.client_max_body_size = parseSize(size_str);
+  expectToken(tokens, index, ";");
+}
+
+// Location directive handlers
+
+void Config::handleRoot(std::vector<std::string>& tokens, size_t& index, LocationConfig& location) {
+  std::string root = getNextToken(tokens, index);
+  if (root.empty() || root == ";")
+    throw ConfigException("Empty value for root directive");
+  location.root = root;
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleIndex(std::vector<std::string>& tokens, size_t& index, LocationConfig& location) {
+  while (index < tokens.size() && tokens[index] != ";") {
+    std::string idx = getNextToken(tokens, index);
+    if (!idx.empty() && idx != ";")
+      location.index.push_back(idx);
+  }
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleAllowedMethods(std::vector<std::string>& tokens, size_t& index, LocationConfig& location) {
+  location.allowed_methods.clear();
+  while (index < tokens.size() && tokens[index] != ";") {
+    std::string method = getNextToken(tokens, index);
+    if (!method.empty() && method != ";") {
+      if (method != "GET" && method != "POST" && method != "DELETE" &&
+          method != "PUT" && method != "HEAD" && method != "OPTIONS" &&
+          method != "PATCH")
+        throw ConfigException("Unknown HTTP method: " + method);
+      location.allowed_methods.push_back(method);
+    }
+  }
+  if (location.allowed_methods.empty())
+    throw ConfigException("allowed_methods directive requires at least one method");
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleAutoindex(std::vector<std::string>& tokens, size_t& index, LocationConfig& location) {
+  std::string value = getNextToken(tokens, index);
+  if (value != "on" && value != "off")
+    throw ConfigException("autoindex must be 'on' or 'off', got: " + value);
+  location.autoindex = (value == "on");
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleRedirect(std::vector<std::string>& tokens, size_t& index, LocationConfig& location) {
+  int code = parseInt(getNextToken(tokens, index), "redirect code");
+  if (!isValidRedirectCode(code))
+    throw ConfigException("Invalid redirect code: " + std::to_string(code));
+  location.redirect_code = code;
+  std::string url = getNextToken(tokens, index);
+  if (url.empty() || url == ";")
+    throw ConfigException("redirect directive requires a URL");
+  location.redirect_url = url;
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleUploadEnable(std::vector<std::string>& tokens, size_t& index, LocationConfig& location) {
+  std::string value = getNextToken(tokens, index);
+  if (value != "on" && value != "off")
+    throw ConfigException("upload_enable must be 'on' or 'off', got: " + value);
+  location.upload_enabled = (value == "on");
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleUploadStore(std::vector<std::string>& tokens, size_t& index, LocationConfig& location) {
+  std::string store = getNextToken(tokens, index);
+  if (store.empty() || store == ";")
+    throw ConfigException("Empty value for upload_store directive");
+  location.upload_store = store;
+  expectToken(tokens, index, ";");
+}
+
+void Config::handleCgiPass(std::vector<std::string>& tokens, size_t& index, LocationConfig& location) {
+  std::string extension = getNextToken(tokens, index);
+  std::string cgi_path = getNextToken(tokens, index);
+  if (extension.empty() || cgi_path.empty())
+    throw ConfigException("cgi_pass requires extension and path");
+  location.cgi_pass[extension] = cgi_path;
+  expectToken(tokens, index, ";");
+}
+
+// Static dispatch tables
+
+const std::map<std::string, Config::ServerDirectiveHandler> Config::serverHandlers = {
+  {"listen",               &Config::handleListen},
+  {"server_name",          &Config::handleServerName},
+  {"error_page",           &Config::handleErrorPage},
+  {"client_max_body_size", &Config::handleClientMaxBodySize}
+};
+
+const std::map<std::string, Config::LocationDirectiveHandler> Config::locationHandlers = {
+  {"root",            &Config::handleRoot},
+  {"index",           &Config::handleIndex},
+  {"allowed_methods", &Config::handleAllowedMethods},
+  {"autoindex",       &Config::handleAutoindex},
+  {"redirect",        &Config::handleRedirect},
+  {"return",          &Config::handleRedirect},
+  {"upload_enable",   &Config::handleUploadEnable},
+  {"upload_store",    &Config::handleUploadStore},
+  {"cgi_pass",        &Config::handleCgiPass}
+};
+
+// Block parsers using dispatch tables
+
 void Config::parseServerBlock(std::vector<std::string>& tokens, size_t& index) {
   ServerConfig server;
 
@@ -179,45 +330,14 @@ void Config::parseServerBlock(std::vector<std::string>& tokens, size_t& index) {
   while (index < tokens.size() && tokens[index] != "}") {
     std::string directive = getNextToken(tokens, index);
 
-    if (directive == "listen") {
-      std::string port = getNextToken(tokens, index);
-      validatePort(port);
-      server.listen_ports.push_back(port);
-      expectToken(tokens, index, ";");
-    } else if (directive == "server_name") {
-      std::string name = getNextToken(tokens, index);
-      if (name.empty() || name == ";")
-        throw ConfigException("Empty value for server_name");
-      server.server_name = name;
-      expectToken(tokens, index, ";");
-    } else if (directive == "error_page") {
-      std::vector<int> codes;
-      while (index < tokens.size() && tokens[index] != ";") {
-        std::string token = tokens[index];
-        if (!token.empty() && token[0] >= '0' && token[0] <= '9') {
-          int code = parseInt(token, "error_page code");
-          validateHttpCode(code, "error_page");
-          codes.push_back(code);
-          ++index;
-        } else {
-          break;
-        }
-      }
-      if (codes.empty())
-        throw ConfigException("error_page directive requires at least one status code");
-      std::string page = getNextToken(tokens, index);
-      if (page.empty() || page == ";")
-        throw ConfigException("error_page directive requires a file path");
-      for (size_t i = 0; i < codes.size(); ++i) {
-        server.error_pages[std::to_string(codes[i])] = page;
-      }
-      expectToken(tokens, index, ";");
-    } else if (directive == "client_max_body_size") {
-      std::string size_str = getNextToken(tokens, index);
-      server.client_max_body_size = parseSize(size_str);
-      expectToken(tokens, index, ";");
-    } else if (directive == "location") {
+    if (directive == "location") {
       parseLocationBlock(tokens, index, server);
+      continue;
+    }
+
+    std::map<std::string, ServerDirectiveHandler>::const_iterator it = serverHandlers.find(directive);
+    if (it != serverHandlers.end()) {
+      (this->*(it->second))(tokens, index, server);
     } else {
       throw ConfigException("Unknown directive in server block: " + directive);
     }
@@ -227,94 +347,25 @@ void Config::parseServerBlock(std::vector<std::string>& tokens, size_t& index) {
   servers.push_back(server);
 }
 
-void Config::parseLocationBlock(std::vector<std::string>& lines, size_t& index, ServerConfig& server) {
+void Config::parseLocationBlock(std::vector<std::string>& tokens, size_t& index, ServerConfig& server) {
   LocationConfig location;
 
-  std::string path = getNextToken(lines, index);
+  std::string path = getNextToken(tokens, index);
   location.path = path;
-  expectToken(lines, index, "{");
+  expectToken(tokens, index, "{");
 
-  while (index < lines.size() && lines[index] != "}") {
-    std::string directive = getNextToken(lines, index);
+  while (index < tokens.size() && tokens[index] != "}") {
+    std::string directive = getNextToken(tokens, index);
 
-    if (directive == "root") {
-      std::string root = getNextToken(lines, index);
-      if (root.empty() || root == ";")
-        throw ConfigException("Empty value for root directive");
-      location.root = root;
-      expectToken(lines, index, ";");
-    } else if (directive == "index") {
-      while (index < lines.size() && lines[index] != ";") {
-        std::string idx = getNextToken(lines, index);
-        if (!idx.empty() && idx != ";")
-          location.index.push_back(idx);
-      }
-      expectToken(lines, index, ";");
-    } else if (directive == "allowed_methods") {
-      location.allowed_methods.clear();
-      while (index < lines.size() && lines[index] != ";") {
-        std::string method = getNextToken(lines, index);
-        if (!method.empty() && method != ";") {
-          if (method != "GET" && method != "POST" && method != "DELETE" &&
-              method != "PUT" && method != "HEAD" && method != "OPTIONS" &&
-              method != "PATCH")
-            throw ConfigException("Unknown HTTP method: " + method);
-          location.allowed_methods.push_back(method);
-        }
-      }
-      if (location.allowed_methods.empty())
-        throw ConfigException("allowed_methods directive requires at least one method");
-      expectToken(lines, index, ";");
-    } else if (directive == "autoindex") {
-      std::string value = getNextToken(lines, index);
-      if (value != "on" && value != "off")
-        throw ConfigException("autoindex must be 'on' or 'off', got: " + value);
-      location.autoindex = (value == "on");
-      expectToken(lines, index, ";");
-    } else if (directive == "redirect") {
-      int code = parseInt(getNextToken(lines, index), "redirect code");
-      if (!isValidRedirectCode(code))
-        throw ConfigException("Invalid redirect code: " + std::to_string(code));
-      location.redirect_code = code;
-      std::string url = getNextToken(lines, index);
-      if (url.empty() || url == ";")
-        throw ConfigException("redirect directive requires a URL");
-      location.redirect_url = url;
-      expectToken(lines, index, ";");
-    } else if (directive == "return") {
-      int code = parseInt(getNextToken(lines, index), "return code");
-      if (!isValidRedirectCode(code))
-        throw ConfigException("Invalid return code: " + std::to_string(code));
-      location.redirect_code = code;
-      std::string url = getNextToken(lines, index);
-      if (url.empty() || url == ";")
-        throw ConfigException("return directive requires a URL");
-      location.redirect_url = url;
-      expectToken(lines, index, ";");
-    } else if (directive == "upload_enable") {
-      std::string value = getNextToken(lines, index);
-      if (value != "on" && value != "off")
-        throw ConfigException("upload_enable must be 'on' or 'off', got: " + value);
-      location.upload_enabled = (value == "on");
-      expectToken(lines, index, ";");
-    } else if (directive == "upload_store") {
-      std::string store = getNextToken(lines, index);
-      if (store.empty() || store == ";")
-        throw ConfigException("Empty value for upload_store directive");
-      location.upload_store = store;
-      expectToken(lines, index, ";");
-    } else if (directive == "cgi_pass") {
-      std::string extension = getNextToken(lines, index);
-      std::string cgi_path = getNextToken(lines, index);
-      if (extension.empty() || cgi_path.empty())
-        throw ConfigException("cgi_pass requires extension and path");
-      location.cgi_pass[extension] = cgi_path;
-      expectToken(lines, index, ";");
+    std::map<std::string, LocationDirectiveHandler>::const_iterator it = locationHandlers.find(directive);
+    if (it != locationHandlers.end()) {
+      (this->*(it->second))(tokens, index, location);
     } else {
       throw ConfigException("Unknown directive in location block: " + directive);
     }
   }
-  expectToken(lines, index, "}");
+
+  expectToken(tokens, index, "}");
   server.locations.push_back(location);
 }
 
