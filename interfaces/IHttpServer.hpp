@@ -1,6 +1,9 @@
 #ifndef __IHTTPSERVER_HPP
 #define __IHTTPSERVER_HPP
 
+#include "parsing.hpp"
+#include "IHttpApp.hpp"
+#include <memory>
 
 class IHttpServer
 {
@@ -12,8 +15,7 @@ public:
     IHttpServer& operator=(const IHttpServer&) = default;
     virtual ~IHttpServer() = default;
 
-	virtual void setConfig() = 0;
-	virtual void serApp() = 0;
+	virtual void setApp(std::unique_ptr<IHttpApp>) = 0;
 	virtual void run() = 0;
 };
 
