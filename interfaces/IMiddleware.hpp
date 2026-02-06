@@ -21,7 +21,7 @@ public:
     IMiddleware& operator=(IMiddleware&& ather) = default;
 
 	virtual void setNext(std::unique_ptr<IMiddleware> next) =0;
-	virtual bool handle(const HttpRequest& request, HttpResponse& response) =0; 
+	virtual bool handle(HttpRequest& request, HttpResponse& response) =0; 
 };
 
 #endif
