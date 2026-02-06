@@ -22,13 +22,14 @@ private:
 	} State;
 
 	State _state;
+	// TODO: At new version add this classses
 	// std::unique_ptr<IHttpReader> _reader;
 	// std::unique_ptr<IHttpWriter> _writer;
 
 	bool _reciveMessage();
 
 public:
-	HttpConnection();
+	HttpConnection() = delete;
 	HttpConnection(const HttpConnection& other);
 	HttpConnection operator=(const HttpConnection& other);
 	~HttpConnection() override;

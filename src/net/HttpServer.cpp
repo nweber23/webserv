@@ -25,7 +25,8 @@ HttpServer::HttpServer(std::unique_ptr<ServerConfig> config)
 
 HttpServer::~HttpServer()
 {
-	close(_listenFd);
+	for (int fd : _listenFds)
+		close(fd);
 	close(_epfd);
 }
 
@@ -41,40 +42,6 @@ void HttpServer::_setNonBlocking(int fd)
 	{
 		throw std::runtime_error("fcntl error: try to setup nonblock");
 	}
-}
-
-int HttpServer::_setupSocket()
-{
-	int fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (fd < 0)
-	{
-		throw std::runtime_error("Error: can't create socket");
-	}
-
-	int opt = 1;
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0)
-	{
-		throw std::runtime_error("Error: can't setup socket option");
-	}
-	sockaddr_in adress;
-
-	adress.sin_family = AF_INET;
-	adress.sin_addr.s_addr = htonl(INADDR_ANY);
-	adress.sin_port = htons(8080);
-
-	if (bind(fd, reinterpret_cast<struct sockaddr*>(&adress), sizeof(adress)) < 0)
-	{
-
-
-		throw std::runtime_error("Error: can't bind socket");
-	}
-
-	if (listen(fd, SOMAXCONN) < 0)
-	{
-		throw std::runtime_error("Error: can't listen");
-	}
-	_setNonBlocking(fd);
-	return fd;
 }
 
 int HttpServer::_setupSocket(int listenPort)
@@ -122,20 +89,21 @@ void HttpServer::_setup()
 	for(auto port : ports)
 	{
 		auto portInt = std::stoi(port);
-		_listenFd = _setupSocket(portInt);
+		int fd = _setupSocket(portInt);
+		_listenFds.insert(fd);
 		struct epoll_event event;
 		event.events = EPOLLIN;
-		event.data.fd = _listenFd;
-		if (epoll_ctl(_epfd, EPOLL_CTL_ADD, _listenFd, &event) < 0)
+		event.data.fd = fd;
+		if (epoll_ctl(_epfd, EPOLL_CTL_ADD, fd, &event) < 0)
 		{
 			std::runtime_error("Error: can't add fd to epoll (epoll_ctl)");
 		}	
 	}
 }
 
-void HttpServer::_initialConnection()
+void HttpServer::_initialConnection(int listenFd)
 {
-	int clientFd = accept(_listenFd, nullptr, nullptr);
+	int clientFd = accept(listenFd, nullptr, nullptr);
 	_setNonBlocking(clientFd);
 
 	struct epoll_event clientEvent;
@@ -157,6 +125,7 @@ void HttpServer::_handleInited(int fd)
 		close(fd);
 		epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
 	}
+	//TODO: Not finished error handle in that cases
 	if (connection->isError())
 	{
 		connection->queueResponse(error());
@@ -170,15 +139,20 @@ void HttpServer::_handleEpollQue(struct epoll_event *que, int size)
 	for (int i = 0; i < size; ++i)
 	{
 		int fd = que[i].data.fd;
-		if (fd == _listenFd)
+		if (_listenFds.count(fd))
 		{
-			_initialConnection();
+			_initialConnection(fd);
 		}
 		else	
 		{
 			_handleInited(fd);
 		}
 	}
+}
+
+void HttpServer::setApp(std::unique_ptr<IHttpApp> app)
+{
+	_app = std::move(app);
 }
 
 void HttpServer::run()

@@ -7,11 +7,12 @@
 #include <sys/epoll.h>
 #include <memory>
 #include <map>
+#include <set>
 
 class HttpServer : public IHttpServer
 {
 private:
-	int _listenFd;
+	std::set<int> _listenFds;
 	int _epfd;
 	
 	// std::unordered_map just for remember
@@ -22,9 +23,8 @@ private:
 
 	void _setup();
 	void _setNonBlocking(int fd);
-	int _setupSocket();
-	int _setupSocket(int listenPort);
-	void _initialConnection();
+	int  _setupSocket(int listenPort);
+	void _initialConnection(int listenFd);
 	void _handleInited(int fd);
 	void _handleEpollQue(struct epoll_event *que, int size);
 
