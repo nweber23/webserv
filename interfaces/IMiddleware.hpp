@@ -9,12 +9,11 @@
 // Chain of Responsibility design pattern
 class IMiddleware
 {
-private:
+public:
 	IMiddleware() = default;
-	
+
 	IMiddleware(const IMiddleware& ather) = delete;
 	IMiddleware& operator=(const IMiddleware& ather) = delete;
-public:
 	virtual ~IMiddleware() = default;
 	
 	virtual void setNext(std::unique_ptr<IMiddleware> next) =0;
