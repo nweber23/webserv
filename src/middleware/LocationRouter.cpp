@@ -22,7 +22,6 @@ bool LocationRouter::_matchesPrefix(const std::string& locationPath,
 bool LocationRouter::handle(HttpRequest& request, HttpResponse& response)
 {
 	const LocationConfig* best = nullptr;
-	size_t bestLen = 0;
 
 	for (const auto& location : _locations)
 	{
