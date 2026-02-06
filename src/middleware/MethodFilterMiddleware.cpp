@@ -1,7 +1,7 @@
-#include "middleware/MethodFilter.hpp"
+#include "middleware/MethodFilterMiddleware.hpp"
 #include "parsing.hpp"
 
-bool MethodFilter::handle(HttpRequest& request, HttpResponse& response)
+bool MethodFilterMiddleware::handle(HttpRequest& request, HttpResponse& response)
 {
 	if (!request.location)
 		return callNext(request, response);
