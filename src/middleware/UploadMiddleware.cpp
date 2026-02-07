@@ -22,22 +22,20 @@ bool UploadMiddleware::handle(HttpRequest& request, HttpResponse& response)
 
 bool UploadMiddleware::_isDirExist(const std::string& direcotry)
 {
+	struct stat info;
+	const char *path = direcotry.c_str();
 
-}
-
-bool UploadMiddleware::_handleUpload(const HttpRequest& request,
-                                 HttpResponse& response) const
-{
-	const std::string& store = request.location->upload_store;
-	if (store.empty())
+	if (stat(path, &info) != 0)
 	{
-		response.status = 500;
-		response.statusText = "Internal Server Error";
-		response.body = "<h1>500 upload_store not configured</h1>";
-		return true;
+		return false;
 	}
 
-	// Derive a filename from the URI tail or a custom header
+	return S_ISDIR(info.st_mode);
+}
+
+
+std::string UploadMiddleware::_extractUploadPath(const HttpRequest& request)
+{
 	std::string relPath = request.path.substr(request.location->path.size());
 	if (!relPath.empty() && relPath[0] == '/')
 		relPath.erase(0, 1);
@@ -45,16 +43,43 @@ bool UploadMiddleware::_handleUpload(const HttpRequest& request,
 	std::string filename;
 	if (relPath.empty())
 	{
-		auto it = request.headers.find("X-Filename");
-		if (it != request.headers.end())
-			filename = it->second;
-		else
-			filename = "upload_" + std::to_string(std::time(nullptr));
+		// TODO: Temporary solution, maybe check Content-Disposition headers
+		filename = "upload_" + std::to_string(std::time(nullptr));
 	}
 	else
 	{
 		filename = relPath;
 	}
+	return filename;
+}
+
+void UploadMiddleware::_setErrorResponse(HttpResponse& response)
+{
+	response.status = 500;
+	response.statusText = "Internal Server Error";
+	response.body = "<h1>500 upload_store not configured</h1>";
+}
+
+void UploadMiddleware::_setSuccessResponse(HttpResponse& response, std::string& fullPath)
+{
+	response.status = 201;
+	response.statusText = "Created";
+	response.headers["Content-Type"] = "application/json";
+	response.body = "{\"status\":\"uploaded\",\"path\":\"" + fullPath + "\"}";
+	response.headers["Content-Length"] = std::to_string(response.body.size());
+}
+
+bool UploadMiddleware::_handleUpload(const HttpRequest& request,
+                                 HttpResponse& response)
+{
+	const std::string& store = request.location->upload_store;
+	if (store.empty())
+	{
+		_setErrorResponse(response);
+		return true;
+	}
+
+	auto filename = _extractUploadPath(request);
 
 	mkdir(store.c_str(), 0755);
 
@@ -62,25 +87,19 @@ bool UploadMiddleware::_handleUpload(const HttpRequest& request,
 	std::ofstream out(fullPath, std::ios::binary);
 	if (!out.is_open())
 	{
-		response.status = 500;
-		response.statusText = "Internal Server Error";
-		response.body = "<h1>500 Cannot write file</h1>";
+		_setErrorResponse(response);
 		return true;
 	}
 	out.write(request.body.c_str(),
 	          static_cast<std::streamsize>(request.body.size()));
 	out.close();
 
-	response.status = 201;
-	response.statusText = "Created";
-	response.headers["Content-Type"] = "application/json";
-	response.body = "{\"status\":\"uploaded\",\"path\":\"" + fullPath + "\"}";
-	response.headers["Content-Length"] = std::to_string(response.body.size());
+	_setSuccessResponse(response, fullPath);
 	return true;
 }
 
 bool UploadMiddleware::_handleDelete(const HttpRequest& request,
-                                 HttpResponse& response) const
+                                 HttpResponse& response)
 {
 	const std::string& store = request.location->upload_store;
 	std::string relPath = request.path.substr(request.location->path.size());
