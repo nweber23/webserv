@@ -4,9 +4,10 @@
 #include "middleware/LocationRouter.hpp"
 #include "middleware/MethodFilterMiddleware.hpp"
 #include "middleware/RedirectMiddleware.hpp"
-#include "middleware/UploadHandler.hpp"
+#include "middleware/UploadMiddleware.hpp"
 #include "middleware/CgiHandler.hpp"
-#include "middleware/StaticFileHandler.hpp"
+#include "middleware/StaticFileMiddleware.hpp"
+#include "middleware/NotFoundMiddleware.hpp"
 
 #include <iostream>
 #include <memory>
@@ -36,21 +37,25 @@ int main(int argc, char** argv) {
 			//  3. RedirectMiddleware  ── returns 3xx if location has "return"
 			//    │
 			//    ▼
-			//  4. UploadHandler    ── handles POST/DELETE to upload locations
+			//  4. UploadMiddleware    ── handles POST/DELETE to upload locations
 			//    │
 			//    ▼
 			//  5. CgiHandler       ── executes CGI scripts (.py, .php, …)
 			//    │
 			//    ▼
-			//  6. StaticFileHandler── serves files, index, autoindex
+			//  6. StaticFileMiddleware ── serves files, index, autoindex
+			//    │
+			//    ▼
+			//  7. NotFoundMiddleware ── send error response
 			//
 			auto app = std::make_unique<HttpApp>(*cfg);
 			app->use(std::make_unique<LocationRouter>(cfg->locations));
 			app->use(std::make_unique<MethodFilterMiddleware>());
 			app->use(std::make_unique<RedirectMiddleware>());
-			// app->use(std::make_unique<UploadHandler>());
+			app->use(std::make_unique<UploadMiddleware>());
 			// app->use(std::make_unique<CgiHandler>());
-			// app->use(std::make_unique<StaticFileHandler>());
+			app->use(std::make_unique<StaticFileMiddleware>());
+			app->use(std::make_unique<NotFoundMiddleware>());
 
 			auto server = std::make_unique<HttpServer>(std::move(cfg));
 			server->setApp(std::move(app));
