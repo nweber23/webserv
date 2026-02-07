@@ -16,5 +16,10 @@ private:
 	static std::string guessMimeType(const std::string& path);
 
 public:
+	StaticFileMiddleware() = default;
+	StaticFileMiddleware(const StaticFileMiddleware& other) = delete;
+	StaticFileMiddleware& operator=(const StaticFileMiddleware& other) = delete;
+	~StaticFileMiddleware() override = default;
+
 	bool handle(HttpRequest& request, HttpResponse& response) override;
 };
