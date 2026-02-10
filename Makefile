@@ -1,12 +1,13 @@
 MAKEFLAGS	= -s
 
 CPP			= c++
-CXXFLAGS	= -Wall -Wextra -Werror -std=c++17 -Iinc
+CXXFLAGS	= -Wall -Wextra -Werror -std=c++17 -Iinc -Iinterfaces
 
 NAME		= webserv
 
 SRCDIR		= src
 INCDIR		= inc
+INTERFACES  = interfaces
 OBJS_DIR	= objs
 
 SRCS		= $(wildcard $(SRCDIR)/*.cpp)
