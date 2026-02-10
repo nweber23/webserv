@@ -3,7 +3,7 @@
 LocationRouter::LocationRouter(
 	const std::vector<LocationConfig>& locations,
 	std::shared_ptr<ErrorPageHandler> errorHandler)
-	: _locations(locations), AMiddleware(errorHandler)
+	: AMiddleware(errorHandler), _locations(locations)
 	{}
 
 // A location path matches a request path if:
