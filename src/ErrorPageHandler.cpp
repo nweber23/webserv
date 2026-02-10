@@ -9,8 +9,8 @@ ErrorPageHandler::ErrorPageHandler(const ServerConfig& config)
 	initDefaultStatusTexts();
 
 	// Load custom pages from config (key is string like "404", value is file path)
-	for (std::map<std::string, std::string>::const_iterator it = config.error_pages.begin();
-		 it != config.error_pages.end(); ++it)
+	for (std::map<std::string, std::string>::const_iterator it = _config.error_pages.begin();
+		 it != _config.error_pages.end(); ++it)
 	{
 		std::istringstream iss(it->first);
 		int code;

@@ -43,7 +43,7 @@ public:
     ErrorPageHandler() = delete;
 	ErrorPageHandler(const ErrorPageHandler& other) = delete;
 	ErrorPageHandler& operator=(const ErrorPageHandler& other) = delete;
-    ~ErrorPageHandler();
+    ~ErrorPageHandler() = default;
 
 	ErrorPageHandler(const ServerConfig& config);
 
