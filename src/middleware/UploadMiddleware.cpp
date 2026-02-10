@@ -6,6 +6,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+UploadMiddleware::UploadMiddleware(
+	std::shared_ptr<ErrorPageHandler> errorHandler) : AMiddleware(errorHandler)
+{}
+
 bool UploadMiddleware::handle(HttpRequest& request, HttpResponse& response)
 {
 	if (!request.location || !request.location->upload_enabled)
@@ -55,9 +59,7 @@ std::string UploadMiddleware::_extractUploadPath(const HttpRequest& request)
 
 void UploadMiddleware::_setErrorResponse(HttpResponse& response)
 {
-	response.status = 500;
-	response.statusText = "Internal Server Error";
-	response.body = "<h1>500 upload_store not configured</h1>";
+	_errorHandler->buildErrorResponse(InternalServerError, response);
 }
 
 void UploadMiddleware::_setSuccessResponse(HttpResponse& response, std::string& fullPath)
@@ -108,18 +110,14 @@ bool UploadMiddleware::_handleDelete(const HttpRequest& request,
 
 	if (relPath.empty())
 	{
-		response.status = 400;
-		response.statusText = "Bad Request";
-		response.body = "<h1>400 No file specified</h1>";
+		_errorHandler->buildErrorResponse(BadRequest, response);
 		return true;
 	}
 
 	std::string fullPath = store + "/" + relPath;
 	if (unlink(fullPath.c_str()) != 0)
 	{
-		response.status = 404;
-		response.statusText = "Not Found";
-		response.body = "<h1>404 File Not Found</h1>";
+		_errorHandler->buildErrorResponse(NotFound, response);
 		return true;
 	}
 

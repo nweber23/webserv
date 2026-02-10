@@ -26,5 +26,7 @@ public:
 	UploadMiddleware& operator=(const UploadMiddleware& other) = delete;
 	~UploadMiddleware() override = default;
 
+	UploadMiddleware(std::shared_ptr<ErrorPageHandler> errorHandler); 
+
 	bool handle(HttpRequest& request, HttpResponse& response) override;
 };
