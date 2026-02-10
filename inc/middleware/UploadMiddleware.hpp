@@ -12,7 +12,7 @@ private:
 	                  HttpResponse& response);
 	bool _handleDelete(const HttpRequest& request,
 	                  HttpResponse& response);
-	bool _isDirExist(const std::string& direcotry);
+	bool _isDirExist(const std::string& directory);
 
 	std::string _extractUploadPath(const HttpRequest& request);
 	bool _saveData(const std::string &filename, const HttpRequest& request);

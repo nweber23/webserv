@@ -20,10 +20,10 @@ bool UploadMiddleware::handle(HttpRequest& request, HttpResponse& response)
 	return callNext(request, response);
 }
 
-bool UploadMiddleware::_isDirExist(const std::string& direcotry)
+bool UploadMiddleware::_isDirExist(const std::string& directory)
 {
 	struct stat info;
-	const char *path = direcotry.c_str();
+	const char *path = directory.c_str();
 
 	if (stat(path, &info) != 0)
 	{
