@@ -14,5 +14,7 @@ public:
 	MethodFilterMiddleware& operator=(const MethodFilterMiddleware& other) = delete;
 	~MethodFilterMiddleware() override = default;
 
+	MethodFilterMiddleware(std::shared_ptr<ErrorPageHandler> errorHandler);
+
 	bool handle(HttpRequest& request, HttpResponse& response) override;
 };
