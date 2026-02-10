@@ -21,5 +21,7 @@ public:
 	StaticFileMiddleware& operator=(const StaticFileMiddleware& other) = delete;
 	~StaticFileMiddleware() override = default;
 
+	StaticFileMiddleware(std::shared_ptr<ErrorPageHandler> errorHandler);
+		
 	bool handle(HttpRequest& request, HttpResponse& response) override;
 };
