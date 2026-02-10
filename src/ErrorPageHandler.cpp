@@ -105,11 +105,14 @@ void ErrorPageHandler::_buildErrorResponseInternal(
 	int statusCode,
 	HttpResponse& response)
 {
-	response.status = statusCode;
-	response.statusText = getStatusText(statusCode);
-	response.headers["Content-Type"] = "text/html; charset=utf-8";
-	response.body = _getErrorPage(statusCode);
-	response.headers["Content-Length"] = std::to_string(response.body.size());
+	HttpResponse badResponse;
+	badResponse.status = statusCode;
+	badResponse.statusText = getStatusText(statusCode);
+	badResponse.headers["Content-Type"] = "text/html; charset=utf-8";
+	badResponse.body = _getErrorPage(statusCode);
+	badResponse.headers["Content-Length"] = std::to_string(badResponse.body.size());
+
+	response = badResponse;
 }
 
 void ErrorPageHandler::buildErrorResponse(
