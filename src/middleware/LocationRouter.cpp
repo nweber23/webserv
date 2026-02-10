@@ -1,7 +1,10 @@
 #include "middleware/LocationRouter.hpp"
 
-LocationRouter::LocationRouter(const std::vector<LocationConfig>& locations)
-	: _locations(locations) {}
+LocationRouter::LocationRouter(
+	const std::vector<LocationConfig>& locations,
+	std::shared_ptr<ErrorPageHandler> errorHandler)
+	: _locations(locations), AMiddleware(errorHandler)
+	{}
 
 // A location path matches a request path if:
 //   - locationPath == "/"  (catch-all), or
@@ -33,10 +36,7 @@ bool LocationRouter::handle(HttpRequest& request, HttpResponse& response)
 	}
 
 	if (!best) {
-		response.status = 404;
-		response.statusText = "Not Found";
-		response.body = "<h1>404 Not Found</h1>";
-		response.headers["Content-Type"] = "text/html";
+		_errorHandler->buildErrorResponse(NotFound, response);
 		return true;
 	}
 
