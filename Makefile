@@ -10,7 +10,7 @@ INCDIR		= inc
 INTERFACES  = interfaces
 OBJS_DIR	= objs
 
-SRCS		= $(wildcard $(SRCDIR)/*.cpp)
+SRCS		= $(shell find $(SRCDIR) -name '*.cpp' -type f)
 OBJS		= $(patsubst $(SRCDIR)/%.cpp,$(OBJS_DIR)/%.o,$(SRCS))
 
 all: $(NAME)
@@ -20,6 +20,7 @@ $(NAME): $(OBJS)
 	@printf '\033[32mExecutable %s created.\033[0m\n' "$(NAME)"
 
 $(OBJS_DIR)/%.o: $(SRCDIR)/%.cpp | $(OBJS_DIR)
+	mkdir -p $(dir $@)
 	$(CPP) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OBJS_DIR):
