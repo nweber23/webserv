@@ -33,6 +33,13 @@ bool HttpConnection::_reciveMessage()
 			_state = ERROR;
 		return false;
 	}
+
+	// Check if buffer would exceed maximum size
+	if (_buffer.size() + static_cast<size_t>(n) > MAX_BUFFER_SIZE) {
+		_state = ERROR;
+		return false;
+	}
+
 	_buffer.append(buf, static_cast<size_t>(n));
 	return true;
 }
