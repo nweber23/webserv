@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSrv - HTTP Server</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">WebSrv</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Welcome to <span class="highlight">WebSrv</span></h1>
+                <p>A lightweight HTTP server built from scratch in C++</p>
+                <div class="status-box">
+                    <span class="status-dot"></span>
+                    <span id="status-text">Server is running</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Fast</h3>
+                    <p>Optimized for performance with minimal overhead</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Configurable</h3>
+                    <p>Easy to configure with flexible options</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h3>Static Files</h3>
+                    <p>Serve static content efficiently</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Robust</h3>
+                    <p>Built with reliability in mind</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <h2>About This Project</h2>
+            <p>This HTTP server is a 42 school project implementing a web server from scratch using C++.</p>
+            <div class="tech-stack">
+                <span class="tech-badge">C++</span>
+                <span class="tech-badge">HTTP/1.1</span>
+                <span class="tech-badge">Sockets</span>
+                <span class="tech-badge">I/O Multiplexing</span>
+            </div>
+            <div class="team">
+                <h3>Made by</h3>
+                <div class="team-members">
+                    <a href="https://profile-v3.intra.42.fr/users/nluchini" class="team-badge" target="_blank">nluchini</a>
+                    <a href="https://profile-v3.intra.42.fr/users/nweber" class="team-badge" target="_blank">nweber</a>
+                    <a href="https://profile-v3.intra.42.fr/users/yyudi" class="team-badge" target="_blank">yyudi</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="demo">
+            <h2>Interactive Demo</h2>
+            <div class="demo-container">
+                <button id="demo-btn" class="demo-button">Click Me!</button>
+                <p id="demo-output">Clicks: 0</p>
+                <div id="time-display" class="time-display"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 WebSrv Project - 42 School</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
