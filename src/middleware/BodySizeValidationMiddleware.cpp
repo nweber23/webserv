@@ -1,6 +1,6 @@
 #include "middleware/BodySizeValidationMiddleware.hpp"
 #include <cstdlib>
-
+#include <cerrno>
 #include <cctype>
 
 BodySizeValidationMiddleware::BodySizeValidationMiddleware(const ServerConfig& config)
@@ -44,11 +44,36 @@ bool BodySizeValidationMiddleware::handle(HttpRequest& request, HttpResponse& re
   // If Content-Length header is present, validate it
   if (it != request.headers.end()) {
     const std::string& contentLengthStr = it->second;
-    char* endptr;
-    size_t contentLength = std::strtoul(contentLengthStr.c_str(), &endptr, 10);
 
-    // Check if conversion was successful (entire string was a valid number)
-    if (*endptr != '\0') {
+    // Reject empty Content-Length
+    if (contentLengthStr.empty()) {
+      response.status = 400;
+      response.statusText = "Bad Request";
+      response.body = "<h1>400 — Bad Request</h1><p>Invalid Content-Length header</p>";
+      response.headers["Content-Type"] = "text/html";
+      response.headers["Content-Length"] = std::to_string(response.body.size());
+      return true;
+    }
+
+    // Reject if starts with '-' (negative value)
+    if (contentLengthStr[0] == '-') {
+      response.status = 400;
+      response.statusText = "Bad Request";
+      response.body = "<h1>400 — Bad Request</h1><p>Invalid Content-Length header</p>";
+      response.headers["Content-Type"] = "text/html";
+      response.headers["Content-Length"] = std::to_string(response.body.size());
+      return true;
+    }
+
+    char* endptr;
+    errno = 0;  // Clear errno before strtoul
+    unsigned long contentLength = std::strtoul(contentLengthStr.c_str(), &endptr, 10);
+
+    // Check for conversion errors:
+    // 1. No digits parsed (endptr == start)
+    // 2. Trailing non-whitespace (endptr != end of string)
+    // 3. Overflow (errno == ERANGE)
+    if (endptr == contentLengthStr.c_str() || *endptr != '\0' || errno == ERANGE) {
       response.status = 400;
       response.statusText = "Bad Request";
       response.body = "<h1>400 — Bad Request</h1><p>Invalid Content-Length header</p>";
