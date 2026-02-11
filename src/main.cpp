@@ -49,13 +49,15 @@ int main(int argc, char** argv) {
 			//  7. NotFoundMiddleware ── send error response
 			//
 			auto app = std::make_unique<HttpApp>(*cfg);
-			app->use(std::make_unique<LocationRouter>(cfg->locations));
-			app->use(std::make_unique<MethodFilterMiddleware>());
+			auto errorHandler = std::make_shared<ErrorPageHandler>(*cfg);
+
+			app->use(std::make_unique<LocationRouter>(cfg->locations, errorHandler));
+			app->use(std::make_unique<MethodFilterMiddleware>(errorHandler));
 			app->use(std::make_unique<RedirectMiddleware>());
-			app->use(std::make_unique<UploadMiddleware>());
+			app->use(std::make_unique<UploadMiddleware>(errorHandler));
 			// app->use(std::make_unique<CgiHandler>());
-			app->use(std::make_unique<StaticFileMiddleware>());
-			app->use(std::make_unique<NotFoundMiddleware>());
+			app->use(std::make_unique<StaticFileMiddleware>(errorHandler));
+			app->use(std::make_unique<NotFoundMiddleware>(errorHandler));
 
 			auto server = std::make_unique<HttpServer>(std::move(cfg));
 			server->setApp(std::move(app));
