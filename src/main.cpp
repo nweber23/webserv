@@ -2,10 +2,10 @@
 #include "HttpApp.hpp"
 #include "net/HttpServer.hpp"
 #include "middleware/LocationRouter.hpp"
+#include "middleware/BodySizeValidationMiddleware.hpp"
 #include "middleware/MethodFilterMiddleware.hpp"
 #include "middleware/RedirectMiddleware.hpp"
 #include "middleware/UploadMiddleware.hpp"
-#include "middleware/CgiHandler.hpp"
 #include "middleware/StaticFileMiddleware.hpp"
 #include "middleware/NotFoundMiddleware.hpp"
 
@@ -31,25 +31,29 @@ int main(int argc, char** argv) {
 			//  1. LocationRouter   ── picks best location by longest-prefix match
 			//    │
 			//    ▼
-			//  2. MethodFilterMiddleware     ── rejects disallowed HTTP methods  (405)
+			//  2. BodySizeValidationMiddleware ── rejects requests exceeding client_max_body_size (413)
 			//    │
 			//    ▼
-			//  3. RedirectMiddleware  ── returns 3xx if location has "return"
+			//  3. MethodFilterMiddleware     ── rejects disallowed HTTP methods  (405)
 			//    │
 			//    ▼
-			//  4. UploadMiddleware    ── handles POST/DELETE to upload locations
+			//  4. RedirectMiddleware  ── returns 3xx if location has "return"
 			//    │
 			//    ▼
-			//  5. CgiHandler       ── executes CGI scripts (.py, .php, …)
+			//  5. UploadMiddleware    ── handles POST/DELETE to upload locations
 			//    │
 			//    ▼
-			//  6. StaticFileMiddleware ── serves files, index, autoindex
+			//  6. CgiHandler       ── executes CGI scripts (.py, .php, …)
 			//    │
 			//    ▼
-			//  7. NotFoundMiddleware ── send error response
+			//  7. StaticFileMiddleware ── serves files, index, autoindex
+			//    │
+			//    ▼
+			//  8. NotFoundMiddleware ── send error response
 			//
 			auto app = std::make_unique<HttpApp>(*cfg);
 			app->use(std::make_unique<LocationRouter>(cfg->locations));
+			app->use(std::make_unique<BodySizeValidationMiddleware>(*cfg));
 			app->use(std::make_unique<MethodFilterMiddleware>());
 			app->use(std::make_unique<RedirectMiddleware>());
 			app->use(std::make_unique<UploadMiddleware>());

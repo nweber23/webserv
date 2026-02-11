@@ -166,7 +166,7 @@ void HttpServer::run()
 		{
 			_handleEpollQue(events, n);
 		}
-		catch(std::exception e)
+		catch(const std::exception& e)
 		{
 			std::cout << "Error: " << e.what() << std::endl;
 		}
