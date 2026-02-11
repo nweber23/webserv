@@ -26,6 +26,8 @@ private:
 	// std::unique_ptr<IHttpReader> _reader;
 	// std::unique_ptr<IHttpWriter> _writer;
 
+	static const size_t MAX_BUFFER_SIZE = 8388608; // 8 MB max buffer size
+
 	bool _reciveMessage();
 
 public:
