@@ -26,7 +26,7 @@ private:
 	// std::unique_ptr<IHttpReader> _reader;
 	// std::unique_ptr<IHttpWriter> _writer;
 
-	static const size_t MAX_BUFFER_SIZE = 8388608; // 8 MB max buffer size
+	static const size_t MAX_BUFFER_SIZE = 268435456; // 256 MB
 
 	bool _reciveMessage();
 
@@ -40,7 +40,7 @@ public:
 
 	bool readIntoBuffer() override;
 	bool isCompleted() override;
-	bool isError() override; 
+	bool isError() override;
 
     HttpRequest getRequest() const override;
     void queueResponse(const HttpResponse& response) override;
