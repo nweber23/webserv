@@ -5,6 +5,10 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+StaticFileMiddleware::StaticFileMiddleware(
+	std::shared_ptr<ErrorPageHandler> errorHandler) : AMiddleware(errorHandler)
+{}
+
 // Maps the request URL to a filesystem path:
 //   root + (requestPath minus locationPrefix)
 std::string StaticFileMiddleware::resolveFilePath(const HttpRequest& request) const {
@@ -39,10 +43,7 @@ bool StaticFileMiddleware::serveFile(const std::string& filePath,
                                   HttpResponse& response) const {
 	std::ifstream file(filePath, std::ios::binary);
 	if (!file.is_open()) {
-		response.status = 404;
-		response.statusText = "Not Found";
-		response.body = "<h1>404 Not Found</h1>";
-		response.headers["Content-Type"] = "text/html";
+		_errorHandler->buildErrorResponse(NotFound, response);
 		return true;
 	}
 	std::ostringstream ss;
@@ -61,9 +62,7 @@ bool StaticFileMiddleware::generateDirectoryListing(
 		HttpResponse& response) const {
 	DIR* dir = opendir(dirPath.c_str());
 	if (!dir) {
-		response.status = 500;
-		response.statusText = "Internal Server Error";
-		response.body = "<h1>500 Internal Server Error</h1>";
+		_errorHandler->buildErrorResponse(InternalServerError, response);
 		return true;
 	}
 
@@ -119,10 +118,7 @@ bool StaticFileMiddleware::handle(HttpRequest& request, HttpResponse& response) 
 
 	struct stat st;
 	if (stat(filePath.c_str(), &st) != 0) {
-		response.status = 404;
-		response.statusText = "Not Found";
-		response.body = "<h1>404 Not Found</h1>";
-		response.headers["Content-Type"] = "text/html";
+		_errorHandler->buildErrorResponse(NotFound, response);
 		return true;
 	}
 
@@ -140,10 +136,7 @@ bool StaticFileMiddleware::handle(HttpRequest& request, HttpResponse& response) 
 		if (request.location->autoindex)
 			return generateDirectoryListing(filePath, request.path, response);
 
-		response.status = 403;
-		response.statusText = "Forbidden";
-		response.body = "<h1>403 Forbidden</h1>";
-		response.headers["Content-Type"] = "text/html";
+		_errorHandler->buildErrorResponse(Forbidden, response);
 		return true;
 	}
 
