@@ -4,6 +4,7 @@
 
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include <optional>
 
 class IHttpConnection
 {
@@ -17,7 +18,7 @@ public:
 	virtual bool isCompleted() =0;
 	virtual bool isError() =0; 
 
-    virtual HttpRequest getRequest() const =0;
+    virtual std::optional<HttpRequest> getRequest() =0;
     virtual void queueResponse(const HttpResponse& response) =0;
 };
 

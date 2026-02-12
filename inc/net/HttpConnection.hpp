@@ -3,7 +3,7 @@
 #include "IHttpConnection.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
-
+#include <optional>
 #include <memory>
 #include <string>
 
@@ -42,7 +42,7 @@ public:
 	bool isCompleted() override;
 	bool isError() override;
 
-    HttpRequest getRequest() const override;
+    std::optional<HttpRequest> getRequest() override;
     void queueResponse(const HttpResponse& response) override;
 };
 

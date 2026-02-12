@@ -18,7 +18,7 @@ private:
 	
 	// std::unordered_map just for remember
 	// For me it make no sence without threads
-	std::map<int, IHttpConnection*> _connections;
+	std::map<int, std::shared_ptr<IHttpConnection>> _connections;
 	std::unique_ptr<ServerConfig> _config;
 	std::unique_ptr<IHttpApp> _app;
 
@@ -30,6 +30,7 @@ private:
 	void _initialConnection(int listenFd);
 	void _handleInited(int fd);
 	void _handleEpollQue(struct epoll_event *que, int size);
+	void _closeConnectionOnError(int fd);
 
 public:
 	HttpServer();

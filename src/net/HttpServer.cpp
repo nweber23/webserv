@@ -109,28 +109,44 @@ void HttpServer::_initialConnection(int listenFd)
 	clientEvent.events = EPOLLIN | EPOLLHUP;
 	clientEvent.data.fd = clientFd;
 
-	_connections[clientFd] = new HttpConnection(clientFd);
+	_connections[clientFd] = std::make_unique<HttpConnection>(clientFd);
 	epoll_ctl(_epfd, EPOLL_CTL_ADD, clientFd, &clientEvent);
+}
+
+void HttpServer::_closeConnectionOnError(int fd)
+{
+	HttpResponse  errorResponse;
+	
+	auto connection = _connections[fd];
+	_errorHandler->buildErrorResponse(InternalServerError, errorResponse);
+	connection->queueResponse(errorResponse);
+	close(fd);
+	epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
 }
 
 void HttpServer::_handleInited(int fd)
 {
+	// NOTE: I think i don't like that implementation.
 	auto connection = _connections[fd]; 
 	if (connection->readIntoBuffer())
 	{
 		auto request = connection->getRequest();
-		auto response = _app->handle(request);
-		connection->queueResponse(response);
-		close(fd);
-		epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+		if (request.has_value())
+		{
+			auto response = _app->handle(request.value());
+			connection->queueResponse(response);
+			close(fd);
+			epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+		}
+		else 
+		{
+			_closeConnectionOnError(fd);
+			return;
+		}
 	}
 	if (connection->isError())
 	{
-		HttpResponse errorResponse;
-		_errorHandler->buildErrorResponse(InternalServerError, errorResponse);
-		connection->queueResponse(errorResponse);
-		close(fd);
-		epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+		_closeConnectionOnError(fd);
 	}
 }
 
