@@ -12,14 +12,13 @@
 #include <string>
 #define MAX_EVENTS 64
 
-HttpResponse error()
-{
-	return HttpResponse {};	
-}
 
-HttpServer::HttpServer(std::unique_ptr<ServerConfig> config)
+HttpServer::HttpServer(
+	std::unique_ptr<ServerConfig> config,
+	std::shared_ptr<ErrorPageHandler> errorHandler) :
+	_config(std::move(config)),
+	_errorHandler(errorHandler)
 {
-	_config = std::move(config);
 	_setup();
 }
 
@@ -125,10 +124,11 @@ void HttpServer::_handleInited(int fd)
 		close(fd);
 		epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
 	}
-	//TODO: Not finished error handle in that cases
 	if (connection->isError())
 	{
-		connection->queueResponse(error());
+		HttpResponse errorResponse;
+		_errorHandler->buildErrorResponse(InternalServerError, errorResponse);
+		connection->queueResponse(errorResponse);
 		close(fd);
 		epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
 	}

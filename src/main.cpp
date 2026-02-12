@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
 			app->use(std::make_unique<StaticFileMiddleware>(errorHandler));
 			app->use(std::make_unique<NotFoundMiddleware>(errorHandler));
 
-			auto server = std::make_unique<HttpServer>(std::move(cfg));
+			auto server = std::make_unique<HttpServer>(std::move(cfg), errorHandler);
 			server->setApp(std::move(app));
 
 			std::cout << "Starting server '" << serverCfg.server_name

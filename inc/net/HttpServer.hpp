@@ -3,6 +3,7 @@
 #include "IHttpConnection.hpp"
 #include "IHttpServer.hpp"
 #include "IHttpApp.hpp"
+#include "ErrorPageHandler.hpp"
 #include "parsing.hpp"
 #include <sys/epoll.h>
 #include <memory>
@@ -21,6 +22,8 @@ private:
 	std::unique_ptr<ServerConfig> _config;
 	std::unique_ptr<IHttpApp> _app;
 
+	std::shared_ptr<ErrorPageHandler> _errorHandler;
+
 	void _setup();
 	void _setNonBlocking(int fd);
 	int  _setupSocket(int listenPort);
@@ -34,7 +37,10 @@ public:
 	HttpServer operator=(const HttpServer& other);
 	~HttpServer() override;
 
-	HttpServer(std::unique_ptr<ServerConfig> config);
+	HttpServer(
+		std::unique_ptr<ServerConfig> config,
+		std::shared_ptr<ErrorPageHandler> errorHandler);
+
 	void setApp(std::unique_ptr<IHttpApp>) override;
 	void run() override;
 };
