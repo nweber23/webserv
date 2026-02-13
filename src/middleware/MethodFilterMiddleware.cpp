@@ -1,5 +1,5 @@
 #include "middleware/MethodFilterMiddleware.hpp"
-#include "parsing.hpp"
+#include "Parsing.hpp"
 
 MethodFilterMiddleware::MethodFilterMiddleware(
 	std::shared_ptr<ErrorPageHandler> errorHandler) : AMiddleware(errorHandler)
