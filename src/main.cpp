@@ -1,4 +1,4 @@
-#include "parsing.hpp"
+#include "Parsing.hpp"
 #include "HttpApp.hpp"
 #include "net/HttpServer.hpp"
 #include "middleware/LocationRouter.hpp"
@@ -8,6 +8,8 @@
 #include "middleware/UploadMiddleware.hpp"
 #include "middleware/StaticFileMiddleware.hpp"
 #include "middleware/NotFoundMiddleware.hpp"
+#include "middleware/CookieMiddleware.hpp"
+#include "ErrorPageHandler.hpp"
 
 #include <iostream>
 #include <memory>
@@ -52,14 +54,16 @@ int main(int argc, char** argv) {
 			//  8. NotFoundMiddleware ── send error response
 			//
 			auto app = std::make_unique<HttpApp>(*cfg);
-			app->use(std::make_unique<LocationRouter>(cfg->locations));
+			auto errorHandler = std::make_shared<ErrorPageHandler>(*cfg);
+			app->use(std::make_unique<LocationRouter>(cfg->locations, errorHandler));
 			app->use(std::make_unique<BodySizeValidationMiddleware>(*cfg));
-			app->use(std::make_unique<MethodFilterMiddleware>());
+			app->use(std::make_unique<MethodFilterMiddleware>(errorHandler));
 			app->use(std::make_unique<RedirectMiddleware>());
-			app->use(std::make_unique<UploadMiddleware>());
+			app->use(std::make_unique<CookieMiddleware>(errorHandler));
+			app->use(std::make_unique<UploadMiddleware>(errorHandler));
 			// app->use(std::make_unique<CgiHandler>());
-			app->use(std::make_unique<StaticFileMiddleware>());
-			app->use(std::make_unique<NotFoundMiddleware>());
+			app->use(std::make_unique<StaticFileMiddleware>(errorHandler));
+			app->use(std::make_unique<NotFoundMiddleware>(errorHandler));
 
 			auto server = std::make_unique<HttpServer>(std::move(cfg));
 			server->setApp(std::move(app));
