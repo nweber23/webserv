@@ -23,7 +23,7 @@
     <main>
         <section class="showcase-header">
             <h1>Cookie Management</h1>
-            <p>Server-side cookie handling for stateful interactions</p>
+            <p>HTTP cookie handling for stateful client-server interactions</p>
         </section>
 
         <div class="showcase-container">
@@ -33,65 +33,39 @@
                 </div>
 
                 <div class="showcase-example">
+                    <h3>Browser Sends Cookie in Request</h3>
+                    <pre><code>GET /cookies.html HTTP/1.1
+Host: localhost:8080
+Cookie: theme_color=#ff6b35</code></pre>
+                </div>
+
+                <div class="showcase-example">
                     <h3>Server Sets Cookie in Response</h3>
                     <pre><code>HTTP/1.1 200 OK
-Set-Cookie: session_id=abc123xyz; Path=/
-Set-Cookie: user=john; Path=/; Expires=Wed, 21 Oct 2025 07:28:00 GMT
+Set-Cookie: theme_color=#ff6b35; Path=/
 Content-Type: text/html
-
-&lt;html&gt;&lt;body&gt;Welcome back!&lt;/body&gt;&lt;/html&gt;</code></pre>
-                </div>
-
-                <div class="showcase-example">
-                    <h3>Client Sends Cookies in Request</h3>
-                    <pre><code>GET /dashboard HTTP/1.1
-Host: localhost:8080
-Cookie: session_id=abc123xyz; user=john</code></pre>
-                </div>
-
-                <div class="showcase-example">
-                    <h3>C++ Server Parsing Cookies</h3>
-                    <pre><code>// Parse Cookie header from request
-std::string cookieHeader = request.headers["Cookie"];
-
-// Split by semicolon and parse key=value pairs
-std::map&lt;std::string, std::string&gt; cookies;
-std::istringstream iss(cookieHeader);
-std::string pair;
-
-while (std::getline(iss, pair, ';')) {
-    size_t pos = pair.find('=');
-    if (pos != std::string::npos) {
-        std::string key = pair.substr(0, pos);
-        std::string value = pair.substr(pos + 1);
-        cookies[key] = value;
-    }
-}</code></pre>
-                </div>
-
-                <div class="showcase-example">
-                    <h3>C++ Server Setting Cookies</h3>
-                    <pre><code>// Build Set-Cookie response headers
-HttpResponse response;
-response.status = 200;
-response.headers["Set-Cookie"] =
-    "session_id=xyz789; Path=/; HttpOnly";
-response.headers["Content-Type"] = "text/html";
-response.body = "&lt;html&gt;...&lt;/html&gt;";</code></pre>
+&lt;html&gt;&lt;body&gt;Color saved!&lt;/body&gt;&lt;/html&gt;
+                    </code></pre>
                 </div>
 
                 <div class="showcase-features">
-                    <h3>Key Features</h3>
+                    <h3>Implementation Details</h3>
                     <ul>
-                        <li>Parse incoming Cookie headers from client requests</li>
-                        <li>Send Set-Cookie headers in server responses</li>
-                        <li>Support cookie attributes (Path, Domain, Expires, HttpOnly, Secure)</li>
-                        <li>Session state management across multiple requests</li>
-                        <li>User authentication and authorization flows</li>
-                        <li>Persistent user preferences and settings</li>
-                        <li>Cookie expiration and lifetime management</li>
-                        <li>Secure stateful client-server interactions</li>
+                        <li>Parse incoming <code>Cookie</code> header from HTTP requests</li>
+                        <li>Extract cookie name-value pairs separated by semicolons</li>
+                        <li>Send <code>Set-Cookie</code> header in HTTP responses to set new cookies</li>
+                        <li>Support cookie attributes: <code>Path</code>, <code>Expires</code>, <code>HttpOnly</code>, <code>Secure</code></li>
+                        <li>Handle form submissions that save user preferences as cookies</li>
+                        <li>Retrieve and apply saved cookies on subsequent page loads</li>
+                        <li>Clear cookies by setting expiration to past date</li>
+                        <li>Cookies persist across page reloads and browser sessions</li>
+                        <li>Browser automatically includes cookies in every request to matching domain/path</li>
                     </ul>
+                </div>
+
+                <div class="showcase-description">
+                    <h3>CookieHandler Implementation</h3>
+                    <p>See <code>inc/CookieHandler.hpp</code> and <code>src/CookieHandler.cpp</code> for the complete C++ implementation of cookie parsing, setting, and clearing functionality.</p>
                 </div>
             </section>
         </div>
