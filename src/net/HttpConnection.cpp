@@ -1,6 +1,7 @@
 #include "net/HttpConnection.hpp"
 #include <unistd.h>
 #include <sstream>
+#include <cstdlib>
 
 HttpConnection::HttpConnection(int fd)
 	: _fd(fd), _state(NEW)
@@ -52,12 +53,60 @@ bool HttpConnection::readIntoBuffer()
 	{
 		return false;
 	}
-	// Simple check: headers are complete when we see \r\n\r\n
-	if (_buffer.find("\r\n\r\n") != std::string::npos)
+
+	// Find end of headers
+	size_t headerEnd = _buffer.find("\r\n\r\n");
+	if (headerEnd == std::string::npos)
+	{
+		_state = WAITING;
+		return false;
+	}
+
+	// Parse headers to find Content-Length
+	std::istringstream stream(_buffer);
+	std::string line;
+	int contentLength = -1;
+
+	// Skip request line
+	std::getline(stream, line);
+
+	// Read headers to find Content-Length
+	while (std::getline(stream, line))
+	{
+		if (!line.empty() && line.back() == '\r')
+			line.pop_back();
+		if (line.empty())
+			break;
+
+		// Check for Content-Length header (case-sensitive)
+		const char* contentLenStr = "Content-Length:";
+		if (line.size() >= 15 && line.substr(0, 15) == contentLenStr)
+		{
+			std::string lenStr = line.substr(15);
+			// Trim leading spaces
+			size_t start = lenStr.find_first_not_of(" \t");
+			if (start != std::string::npos)
+			{
+				contentLength = std::atoi(lenStr.substr(start).c_str());
+			}
+		}
+	}
+
+	// If no Content-Length header found, assume GET or empty body
+	if (contentLength < 0)
+		contentLength = 0;
+
+	// Calculate expected total message size
+	size_t headerAndEmptyLine = headerEnd + 4; // +4 for \r\n\r\n
+	size_t expectedSize = headerAndEmptyLine + contentLength;
+
+	// Check if we have the complete message
+	if (_buffer.size() >= expectedSize)
 	{
 		_state = HANDLED;
 		return true;
 	}
+
 	_state = WAITING;
 	return false;
 }

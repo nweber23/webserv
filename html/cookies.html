@@ -60,11 +60,12 @@
     </footer>
 
     <script>
-        // Color picker visual feedback only
+        // Color picker and cookie management
         document.addEventListener('DOMContentLoaded', function() {
             const colorPicker = document.getElementById('colorPicker');
             const colorDisplay = document.getElementById('colorDisplay');
             const colorValue = document.getElementById('colorValue');
+            const cookieCurrent = document.querySelector('.cookie-current');
 
             function updateColorDisplay(color) {
                 if (color) {
@@ -90,6 +91,32 @@
                 } : { r: 0, g: 0, b: 0 };
             }
 
+            function getCookieValue(name) {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        return cookie.substring(name.length + 1);
+                    }
+                }
+                return null;
+            }
+
+            function updateCookieDisplay() {
+                const savedColor = getCookieValue('theme_color');
+                if (savedColor) {
+                    colorPicker.value = savedColor;
+                    updateColorDisplay(savedColor);
+                    cookieCurrent.textContent = savedColor;
+                } else {
+                    cookieCurrent.textContent = 'Not set';
+                }
+            }
+
+            // Update cookie display on load and after form submission
+            updateCookieDisplay();
+
+            // Listen for cookie changes (form submission will reload page)
             colorPicker.addEventListener('input', function(e) {
                 updateColorDisplay(e.target.value);
             });
