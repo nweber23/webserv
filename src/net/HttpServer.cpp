@@ -81,7 +81,7 @@ void HttpServer::_setup()
 	_epfd = epoll_create1(0);
 	if (_epfd < 0)
 	{
-		std::runtime_error("Error: can't create epoll opject");
+		throw std::runtime_error("Error: can't create epoll object");
 	}
 	
 
@@ -96,7 +96,7 @@ void HttpServer::_setup()
 		event.data.fd = fd;
 		if (epoll_ctl(_epfd, EPOLL_CTL_ADD, fd, &event) < 0)
 		{
-			std::runtime_error("Error: can't add fd to epoll (epoll_ctl)");
+			throw std::runtime_error("Error: can't add fd to epoll (epoll_ctl)");
 		}	
 	}
 }
@@ -104,6 +104,9 @@ void HttpServer::_setup()
 void HttpServer::_initialConnection(int listenFd)
 {
 	int clientFd = accept(listenFd, nullptr, nullptr);
+	if (clientFd < 0)
+		return;
+
 	_setNonBlocking(clientFd);
 
 	struct epoll_event clientEvent;
@@ -116,7 +119,13 @@ void HttpServer::_initialConnection(int listenFd)
 
 void HttpServer::_handleInited(int fd)
 {
-	auto connection = _connections[fd]; 
+	if (_connections.find(fd) == _connections.end())
+		return;
+
+	auto connection = _connections[fd];
+	if (!connection || !_app)
+		return;
+
 	if (connection->readIntoBuffer())
 	{
 		auto request = connection->getRequest();
