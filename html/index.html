@@ -4,89 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSrv - HTTP Server</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <nav>
-            <div class="logo">WebSrv</div>
+        <nav class="navbar">
+            <div class="nav-brand">WebSrv</div>
             <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#features" class="nav-link">Capabilities</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
         <section id="home" class="hero">
-            <div class="hero-content">
-                <h1>Welcome to <span class="highlight">WebSrv</span></h1>
-                <p>A lightweight HTTP server built from scratch in C++</p>
-                <div class="status-box">
-                    <span class="status-dot"></span>
-                    <span id="status-text">Server is running</span>
+            <div class="hero-container">
+                <div class="hero-accent"></div>
+                <div class="hero-content">
+                    <h1 class="hero-title">WebSrv</h1>
+                    <p class="hero-subtitle">A modern HTTP server built from the ground up</p>
+                    <div class="status-indicator">
+                        <span class="pulse"></span>
+                        <span class="status-text">Server is running</span>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="code-block">
+                        <div class="code-line"><span class="keyword">GET</span> / HTTP/1.1</div>
+                        <div class="code-line"><span class="keyword">Host:</span> localhost:8080</div>
+                        <div class="code-line"><span class="keyword">Connection:</span> keep-alive</div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section id="features" class="features">
-            <h2>Features</h2>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🚀</div>
-                    <h3>Fast</h3>
-                    <p>Optimized for performance with minimal overhead</p>
+        <section id="features" class="capabilities">
+            <div class="section-header">
+                <h2>What WebSrv Can Do</h2>
+                <div class="header-line"></div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-number">01</div>
+                    <h3>Static File Serving</h3>
+                    <p>Blazing fast delivery of HTML, CSS, JavaScript, images and media with automatic MIME type detection</p>
+                    <a href="showcase/static-files.html" class="feature-link">
+                        Explore <span class="arrow">→</span>
+                    </a>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔧</div>
-                    <h3>Configurable</h3>
-                    <p>Easy to configure with flexible options</p>
+
+                <div class="feature-item">
+                    <div class="feature-number">02</div>
+                    <h3>Dynamic CGI Execution</h3>
+                    <p>Execute server-side scripts and applications with full environment variable support and process management</p>
+                    <a href="showcase/cgi-execution.html" class="feature-link">
+                        Explore <span class="arrow">→</span>
+                    </a>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📁</div>
-                    <h3>Static Files</h3>
-                    <p>Serve static content efficiently</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Robust</h3>
-                    <p>Built with reliability in mind</p>
+
+                <div class="feature-item">
+                    <div class="feature-number">03</div>
+                    <h3>Cookie Management</h3>
+                    <p>Robust server-side cookie parsing and Set-Cookie header management for stateful interactions</p>
+                    <a href="showcase/cookies.html" class="feature-link">
+                        Explore <span class="arrow">→</span>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <section id="about" class="about">
-            <h2>About This Project</h2>
-            <p>This HTTP server is a 42 school project implementing a web server from scratch using C++.</p>
-            <div class="tech-stack">
-                <span class="tech-badge">C++</span>
-                <span class="tech-badge">HTTP/1.1</span>
-                <span class="tech-badge">Sockets</span>
-                <span class="tech-badge">I/O Multiplexing</span>
-            </div>
-            <div class="team">
-                <h3>Made by</h3>
-                <div class="team-members">
-                    <a href="https://profile-v3.intra.42.fr/users/nluchini" class="team-badge" target="_blank">nluchini</a>
-                    <a href="https://profile-v3.intra.42.fr/users/nweber" class="team-badge" target="_blank">nweber</a>
-                    <a href="https://profile-v3.intra.42.fr/users/yyudi" class="team-badge" target="_blank">yyudi</a>
+        <section class="creators">
+            <div class="creators-content">
+                <h3>Built by</h3>
+                <div class="team-links">
+                    <a href="https://profile-v3.intra.42.fr/users/nluchini" target="_blank" class="team-member">nluchini</a>
+                    <a href="https://profile-v3.intra.42.fr/users/nweber" target="_blank" class="team-member">nweber</a>
+                    <a href="https://profile-v3.intra.42.fr/users/yyudi" target="_blank" class="team-member">yyudi</a>
                 </div>
-            </div>
-        </section>
-
-        <section class="demo">
-            <h2>Interactive Demo</h2>
-            <div class="demo-container">
-                <button id="demo-btn" class="demo-button">Click Me!</button>
-                <p id="demo-output">Clicks: 0</p>
-                <div id="time-display" class="time-display"></div>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2026 WebSrv Project - 42 School</p>
+        <p>&copy; 2026 WebSrv Project — 42 School</p>
     </footer>
 
     <script src="script.js"></script>

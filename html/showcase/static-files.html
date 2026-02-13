@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSrv - Static File Serving</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">WebSrv</div>
+            <ul class="nav-links">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="../index.html#features" class="nav-link">Capabilities</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="showcase-header">
+            <h1>Static File Serving</h1>
+            <p>Efficient serving of static resources with automatic MIME type detection</p>
+        </section>
+
+        <div class="showcase-container">
+            <section class="showcase-content">
+                <div class="showcase-description">
+                    <p>WebSrv efficiently serves static files like HTML pages, stylesheets, scripts, and media. The server automatically detects file types and sets appropriate MIME types based on file extensions.</p>
+                </div>
+
+                <div class="showcase-example">
+                    <h3>Example Request</h3>
+                    <pre><code>GET /assets/style.css HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive</code></pre>
+                </div>
+
+                <div class="showcase-example">
+                    <h3>Example Response</h3>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: text/css
+Content-Length: 1024
+Connection: keep-alive
+
+/* CSS content here */
+body { font-family: sans-serif; }</code></pre>
+                </div>
+
+                <div class="showcase-features">
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Automatic MIME type detection based on file extensions</li>
+                        <li>Support for HTML, CSS, JavaScript, images, videos, and more</li>
+                        <li>Directory listing with <code>autoindex on</code></li>
+                        <li>Default index file serving (index.html)</li>
+                        <li>Efficient buffered reading and writing</li>
+                        <li>Proper Content-Length header calculation</li>
+                        <li>Non-blocking I/O for optimal performance</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 WebSrv Project — 42 School</p>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>
