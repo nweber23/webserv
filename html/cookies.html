@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSrv - Cookie Color Picker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">WebSrv</div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="index.html#features" class="nav-link">Capabilities</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="cookie-hero">
+            <div class="cookie-container">
+                <div class="picker-section">
+                    <div class="color-display" id="colorDisplay"></div>
+
+                    <form method="POST" action="cookies.html" class="picker-controls">
+                        <div class="color-input-group">
+                            <label for="colorPicker">Choose Color:</label>
+                            <input type="color" id="colorPicker" name="theme_color">
+                        </div>
+
+                        <div class="color-value">
+                            <span id="colorValue">Select a color</span>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="submit" name="action" value="save" class="btn btn-save">Save Color</button>
+                            <button type="submit" name="action" value="clear" class="btn btn-clear">Clear Cookie</button>
+                        </div>
+                    </form>
+
+                    <div class="cookie-info">
+                        <div class="info-box">
+                            <div class="status-line">
+                                <span class="label">Cookie:</span>
+                                <span class="value cookie-current">Not set</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 WebSrv Project — 42 School</p>
+    </footer>
+
+    <script>
+        // Color picker and cookie management
+        document.addEventListener('DOMContentLoaded', function() {
+            const colorPicker = document.getElementById('colorPicker');
+            const colorDisplay = document.getElementById('colorDisplay');
+            const colorValue = document.getElementById('colorValue');
+            const cookieCurrent = document.querySelector('.cookie-current');
+
+            function updateColorDisplay(color) {
+                if (color) {
+                    colorDisplay.style.backgroundColor = color;
+                    colorValue.textContent = color;
+                    const rgb = hexToRgb(color);
+                    const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+                    colorDisplay.style.color = brightness > 128 ? '#000' : '#fff';
+                    colorDisplay.textContent = color;
+                } else {
+                    colorDisplay.style.backgroundColor = 'transparent';
+                    colorValue.textContent = 'Select a color';
+                    colorDisplay.textContent = '';
+                }
+            }
+
+            function hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : { r: 0, g: 0, b: 0 };
+            }
+
+            function getCookieValue(name) {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        return cookie.substring(name.length + 1);
+                    }
+                }
+                return null;
+            }
+
+            function updateCookieDisplay() {
+                const savedColor = getCookieValue('theme_color');
+                if (savedColor) {
+                    colorPicker.value = savedColor;
+                    updateColorDisplay(savedColor);
+                    cookieCurrent.textContent = savedColor;
+                } else {
+                    cookieCurrent.textContent = 'Not set';
+                }
+            }
+
+            // Update cookie display on load and after form submission
+            updateCookieDisplay();
+
+            // Listen for cookie changes (form submission will reload page)
+            colorPicker.addEventListener('input', function(e) {
+                updateColorDisplay(e.target.value);
+            });
+        });
+    </script>
+</body>
+</html>

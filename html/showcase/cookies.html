@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSrv - Cookie Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">WebSrv</div>
+            <ul class="nav-links">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="../index.html#features" class="nav-link">Capabilities</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="showcase-header">
+            <h1>Cookie Management</h1>
+            <p>HTTP cookie handling for stateful client-server interactions</p>
+        </section>
+
+        <div class="showcase-container">
+            <section class="showcase-content">
+                <div class="showcase-description">
+                    <p>WebSrv implements full cookie support for maintaining user state across requests. The server parses Cookie headers from client requests and sends Set-Cookie headers in responses, enabling session management and user preference persistence.</p>
+                </div>
+
+                <div class="showcase-example">
+                    <h3>Browser Sends Cookie in Request</h3>
+                    <pre><code>GET /cookies.html HTTP/1.1
+Host: localhost:8080
+Cookie: theme_color=#ff6b35</code></pre>
+                </div>
+
+                <div class="showcase-example">
+                    <h3>Server Sets Cookie in Response</h3>
+                    <pre><code>HTTP/1.1 200 OK
+Set-Cookie: theme_color=#ff6b35; Path=/
+Content-Type: text/html
+&lt;html&gt;&lt;body&gt;Color saved!&lt;/body&gt;&lt;/html&gt;
+                    </code></pre>
+                </div>
+
+                <div class="showcase-features">
+                    <h3>Implementation Details</h3>
+                    <ul>
+                        <li>Parse incoming <code>Cookie</code> header from HTTP requests</li>
+                        <li>Extract cookie name-value pairs separated by semicolons</li>
+                        <li>Send <code>Set-Cookie</code> header in HTTP responses to set new cookies</li>
+                        <li>Support cookie attributes: <code>Path</code>, <code>Expires</code>, <code>HttpOnly</code>, <code>Secure</code></li>
+                        <li>Handle form submissions that save user preferences as cookies</li>
+                        <li>Retrieve and apply saved cookies on subsequent page loads</li>
+                        <li>Clear cookies by setting expiration to past date</li>
+                        <li>Cookies persist across page reloads and browser sessions</li>
+                        <li>Browser automatically includes cookies in every request to matching domain/path</li>
+                    </ul>
+                </div>
+
+                <div class="showcase-description">
+                    <h3>CookieHandler Implementation</h3>
+                    <p>See <code>inc/CookieHandler.hpp</code> and <code>src/CookieHandler.cpp</code> for the complete C++ implementation of cookie parsing, setting, and clearing functionality.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 WebSrv Project — 42 School</p>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSrv - Dynamic CGI Execution</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">WebSrv</div>
+            <ul class="nav-links">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="../index.html#features" class="nav-link">Capabilities</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="showcase-header">
+            <h1>Dynamic CGI Execution</h1>
+            <p>Execute server-side scripts with full environment variable support</p>
+        </section>
+
+        <div class="showcase-container">
+            <section class="showcase-content">
+                <div class="showcase-description">
+                    <p>WebSrv executes server-side scripts through the Common Gateway Interface. The server handles environment variable setup, request body passing, and response processing. Scripts can be written in Python, Perl, Bash, and other languages.</p>
+                </div>
+
+                <div class="showcase-example">
+                    <h3>Example Request</h3>
+                    <pre><code>POST /cgi-bin/script.py HTTP/1.1
+Host: localhost:8080
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 19
+
+name=John&age=30</code></pre>
+                </div>
+
+                <div class="showcase-example">
+                    <h3>CGI Script (Python Example)</h3>
+                    <pre><code>#!/usr/bin/env python3
+import os
+import sys
+
+print("Content-Type: application/json")
+print()
+
+name = os.environ.get('QUERY_STRING', '')
+print(f'{{"greeting": "Hello {name}"}}')</code></pre>
+                </div>
+
+                <div class="showcase-example">
+                    <h3>Server Response</h3>
+                    <pre><code>HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 29
+
+{"greeting": "Hello John&age=30"}</code></pre>
+                </div>
+
+                <div class="showcase-features">
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Full HTTP environment variable setup (REQUEST_METHOD, PATH_INFO, QUERY_STRING, etc.)</li>
+                        <li>Request body passed via stdin to script</li>
+                        <li>Support for multiple interpreters (Python, Perl, Bash, etc.)</li>
+                        <li>Configurable per file extension</li>
+                        <li>EOF handling for chunked requests</li>
+                        <li>Proper process management with fork()</li>
+                        <li>Script execution in correct directory</li>
+                        <li>Response header and body processing</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 WebSrv Project — 42 School</p>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 #include <string>
 #include <map>
-#include "parsing.hpp"
+#include "Parsing.hpp"
 #include "HttpResponse.hpp"
 
 
@@ -36,7 +36,7 @@ private:
     std::string generateDefaultPage(int statusCode);
 	std::string _getErrorPage(int statusCode);
 	int _mapErrorCode(ErrorCode errorCode);
-	
+
 	void _buildErrorResponseInternal(int statusCode, HttpResponse& response);
 
 public:
