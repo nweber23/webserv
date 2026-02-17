@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>503 Service Unavailable</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Libre Baskerville', Georgia, serif;
+            background: #f6f4f0;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container { text-align: center; padding: 2rem; }
+        .code {
+            font-size: 7rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            color: #1a1a1a;
+        }
+        .title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #c0392b;
+            margin: 1rem 0 1.5rem;
+        }
+        .message {
+            font-size: 0.95rem;
+            color: #8a8680;
+            max-width: 380px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+        a {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #1a1a1a;
+            text-decoration: none;
+            border: 1px solid #c5c1ba;
+            padding: 0.6rem 1.5rem;
+            transition: all 0.15s ease;
+        }
+        a:hover {
+            background: #1a1a1a;
+            color: #f6f4f0;
+            border-color: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="code">503</div>
+        <div class="title">Service Unavailable</div>
+        <p class="message">The server is temporarily unable to handle the request.</p>
+        <a href="/">Go Home</a>
+    </div>
+</body>
+</html>
