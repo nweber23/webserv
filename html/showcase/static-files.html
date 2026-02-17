@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSrv - Static File Serving</title>
+    <title>WebSrv &mdash; Static File Serving</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -29,18 +29,18 @@
         <div class="showcase-container">
             <section class="showcase-content">
                 <div class="showcase-description">
-                    <p>WebSrv efficiently serves static files like HTML pages, stylesheets, scripts, and media. The server automatically detects file types and sets appropriate MIME types based on file extensions.</p>
+                    <p>WebSrv serves static files&mdash;HTML pages, stylesheets, scripts, and media. The server detects file types and sets appropriate MIME types based on file extensions.</p>
                 </div>
 
                 <div class="showcase-example">
-                    <h3>Example Request</h3>
+                    <h3>Request</h3>
                     <pre><code>GET /assets/style.css HTTP/1.1
 Host: localhost:8080
 Connection: keep-alive</code></pre>
                 </div>
 
                 <div class="showcase-example">
-                    <h3>Example Response</h3>
+                    <h3>Response</h3>
                     <pre><code>HTTP/1.1 200 OK
 Content-Type: text/css
 Content-Length: 1024
@@ -51,7 +51,7 @@ body { font-family: sans-serif; }</code></pre>
                 </div>
 
                 <div class="showcase-features">
-                    <h3>Key Features</h3>
+                    <h3>Features</h3>
                     <ul>
                         <li>Automatic MIME type detection based on file extensions</li>
                         <li>Support for HTML, CSS, JavaScript, images, videos, and more</li>
@@ -67,7 +67,7 @@ body { font-family: sans-serif; }</code></pre>
     </main>
 
     <footer>
-        <p>&copy; 2026 WebSrv Project — 42 School</p>
+        <p>&copy; 2026 WebSrv &mdash; 42 School</p>
     </footer>
 
     <script src="../script.js"></script>
