@@ -167,20 +167,24 @@ bool CgiHandler::runCgi(const HttpRequest& request,
 
 		// chdir to script directory for relative paths
 		std::string dir = ".";
+		std::string filename = scriptPath;
 		size_t slash = scriptPath.find_last_of('/');
 		if (slash != std::string::npos)
+		{
 			dir = scriptPath.substr(0, slash);
+			filename = scriptPath.substr(slash + 1);
+		}
 		(void)chdir(dir.c_str());
 
 		// argv
 		const bool directExec = (interpreter == "DIRECT" || interpreter == "-" || interpreter == "");
 		std::vector<std::string> argvStr;
 		if (directExec)
-			argvStr.push_back(scriptPath);
+			argvStr.push_back(filename);
 		else
 		{
 			argvStr.push_back(interpreter);
-			argvStr.push_back(scriptPath);
+			argvStr.push_back(filename);
 		}
 		std::vector<char*> argv;
 		for (auto& s : argvStr)
@@ -195,7 +199,7 @@ bool CgiHandler::runCgi(const HttpRequest& request,
 		envp.push_back(nullptr);
 
 		if (directExec)
-			execve(scriptPath.c_str(), argv.data(), envp.data());
+			execve(filename.c_str(), argv.data(), envp.data());
 		else
 			execve(interpreter.c_str(), argv.data(), envp.data());
 		// If execve fails

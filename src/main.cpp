@@ -6,6 +6,7 @@
 #include "middleware/MethodFilterMiddleware.hpp"
 #include "middleware/RedirectMiddleware.hpp"
 #include "middleware/UploadMiddleware.hpp"
+#include "middleware/CgiHandler.hpp"
 #include "middleware/StaticFileMiddleware.hpp"
 #include "middleware/NotFoundMiddleware.hpp"
 #include "middleware/CookieMiddleware.hpp"
@@ -61,7 +62,7 @@ int main(int argc, char** argv) {
 			app->use(std::make_unique<RedirectMiddleware>());
 			app->use(std::make_unique<CookieMiddleware>(errorHandler));
 			app->use(std::make_unique<UploadMiddleware>(errorHandler));
-			// app->use(std::make_unique<CgiHandler>());
+			app->use(std::make_unique<CgiHandler>(errorHandler));
 			app->use(std::make_unique<StaticFileMiddleware>(errorHandler));
 			app->use(std::make_unique<NotFoundMiddleware>(errorHandler));
 

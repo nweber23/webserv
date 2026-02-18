@@ -25,13 +25,18 @@ bool LocationRouter::_matchesPrefix(const std::string& locationPath,
 bool LocationRouter::handle(HttpRequest& request, HttpResponse& response)
 {
 	const LocationConfig* best = nullptr;
+	size_t bestLen = 0;
 
 	for (const auto& location : _locations)
 	{
 		if (_matchesPrefix(location.path, request.path))
 		{
-			best = &location;
-			break;
+			// Choose the longest matching prefix (most specific)
+			if (location.path.size() > bestLen)
+			{
+				best = &location;
+				bestLen = location.path.size();
+			}
 		}
 	}
 
