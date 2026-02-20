@@ -39,8 +39,9 @@ public:
 	HttpConnection(int fd);
 
 	bool readIntoBuffer() override;
-	bool isCompleted() override;
-	bool isError() override;
+	bool isCompleted() const override;
+	bool isWaiting() const override;
+	bool isError() const override;
 
     std::optional<HttpRequest> getRequest() override;
     void queueResponse(const HttpResponse& response) override;

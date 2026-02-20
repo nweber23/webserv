@@ -114,12 +114,17 @@ bool HttpConnection::readIntoBuffer()
 	return false;
 }
 
-bool HttpConnection::isCompleted()
+bool HttpConnection::isCompleted() const
 {
 	return _state == HANDLED;
 }
 
-bool HttpConnection::isError()
+bool HttpConnection::isWaiting() const
+{
+	return _state == WAITING;
+}
+
+bool HttpConnection::isError() const
 {
 	return _state == ERROR;
 }
