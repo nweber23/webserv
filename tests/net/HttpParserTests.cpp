@@ -159,6 +159,27 @@ void test_parseEmptyQueryValue()
 	UPASS(PARSE_EMPTY_QUERY)
 }
 
+#define PARSE_BAD_VALUE_QUERY "test_parseOneBadQueryValue"
+void test_parseOneBadQueryValue()
+{
+	std::string buffer = 
+			"GET /page?q=tmp&hi=&ls=10 HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
+
+	if (!req.has_value())
+		UFAIL(PARSE_BAD_VALUE_QUERY)
+	else if (req->path != "/page")
+		UFAIL(PARSE_BAD_VALUE_QUERY)
+	else if (req->mquery["q"] != "tmp")
+		UFAIL(PARSE_BAD_VALUE_QUERY)
+	else if (req->mquery["ls"] != "10")
+		UFAIL(PARSE_BAD_VALUE_QUERY)
+	UPASS(PARSE_BAD_VALUE_QUERY)
+}
+
 // ─── Header tests ────────────────────────────────────────────────────
 
 #define PARSE_HEADERS "test_parseMultipleHeaders"
@@ -436,6 +457,7 @@ void test_HttpParserTests(void)
 	test_parseQueryString();
 	test_parseNoQueryString();
 	test_parseEmptyQueryValue();
+	test_parseOneBadQueryValue();
 	test_parseMultipleHeaders();
 	test_parseHeaderLeadingSpaces();
 	test_parseNoHeaders();
