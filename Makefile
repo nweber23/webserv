@@ -57,6 +57,7 @@ $(TEST_OBJS_DIR)/%.o: $(TEST_DIR)/%.cpp | $(TEST_OBJS_DIR)
 $(TEST_OBJS_DIR):
 	mkdir -p $(TEST_OBJS_DIR)
 
+build-test: CXXFLAGS += -g -fstandalone-debug
 build-test: $(OBJS) $(TEST_OBJS)
 	$(CPP) $(CXXFLAGS) $(MAIN_OBJS) $(TEST_OBJS) -o $(TEST_NAME)
 	@printf '\033[32mTest executable %s created.\033[0m\n' "$(TEST_NAME)"
@@ -64,10 +65,8 @@ build-test: $(OBJS) $(TEST_OBJS)
 test: build-test
 	@printf '\033[34mRunning tests...\033[0m\n'
 	./$(TEST_NAME)
-	rm -fr $(TEST_NAME)
-	rm -fr $(TEST_OBJS_DIR)
 
 party:
 	@curl parrot.live
 
-.PHONY: all clean fclean re party build-test
+.PHONY: all clean fclean re party build-test build-gtest gtest test
