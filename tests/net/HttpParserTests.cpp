@@ -12,10 +12,12 @@ namespace {
 #define PARSE_GET "test_parseGetRequest"
 void test_parseGetRequest()
 {
-	auto req = HttpParser::parse(
-		"GET /index.html HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer = 
+			"GET /index.html HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+ 
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_GET)
@@ -32,12 +34,14 @@ void test_parseGetRequest()
 #define PARSE_POST "test_parsePostRequest"
 void test_parsePostRequest()
 {
-	auto req = HttpParser::parse(
-		"POST /submit HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"Content-Length: 13\r\n"
-		"\r\n"
-		"name=john+doe");
+	std::string buffer = 
+			"POST /submit HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"Content-Length: 13\r\n"
+			"\r\n"
+			"name=john+doe";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_POST)
@@ -54,10 +58,12 @@ void test_parsePostRequest()
 #define PARSE_DELETE "test_parseDeleteRequest"
 void test_parseDeleteRequest()
 {
-	auto req = HttpParser::parse(
-		"DELETE /users/42 HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer =
+			"DELETE /users/42 HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_DELETE)
@@ -72,12 +78,14 @@ void test_parseDeleteRequest()
 #define PARSE_PUT "test_parsePutRequest"
 void test_parsePutRequest()
 {
-	auto req = HttpParser::parse(
-		"PUT /users/42 HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"Content-Length: 16\r\n"
-		"\r\n"
-		"{\"name\":\"alice\"}");
+	std::string buffer = 
+			"PUT /users/42 HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"Content-Length: 16\r\n"
+			"\r\n"
+			"{\"name\":\"alice\"}";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_PUT)
@@ -96,10 +104,12 @@ void test_parsePutRequest()
 #define PARSE_QUERY "test_parseQueryString"
 void test_parseQueryString()
 {
-	auto req = HttpParser::parse(
-		"GET /search?q=hello&lang=en HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer = 
+			"GET /search?q=hello&lang=en HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_QUERY)
@@ -114,10 +124,12 @@ void test_parseQueryString()
 #define PARSE_NO_QUERY "test_parseNoQueryString"
 void test_parseNoQueryString()
 {
-	auto req = HttpParser::parse(
-		"GET /about HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET /about HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+ 
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_NO_QUERY)
@@ -132,10 +144,12 @@ void test_parseNoQueryString()
 #define PARSE_EMPTY_QUERY "test_parseEmptyQueryValue"
 void test_parseEmptyQueryValue()
 {
-	auto req = HttpParser::parse(
-		"GET /page? HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer = 
+			"GET /page? HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_EMPTY_QUERY)
@@ -150,13 +164,15 @@ void test_parseEmptyQueryValue()
 #define PARSE_HEADERS "test_parseMultipleHeaders"
 void test_parseMultipleHeaders()
 {
-	auto req = HttpParser::parse(
-		"GET / HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"Accept: text/html\r\n"
-		"Connection: keep-alive\r\n"
-		"User-Agent: TestAgent/1.0\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET / HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"Accept: text/html\r\n"
+			"Connection: keep-alive\r\n"
+			"User-Agent: TestAgent/1.0\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_HEADERS)
@@ -175,11 +191,13 @@ void test_parseMultipleHeaders()
 #define PARSE_HEADER_SPACES "test_parseHeaderLeadingSpaces"
 void test_parseHeaderLeadingSpaces()
 {
-	auto req = HttpParser::parse(
-		"GET / HTTP/1.1\r\n"
-		"Host:    localhost\r\n"
-		"Accept:  text/html\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET / HTTP/1.1\r\n"
+			"Host:    localhost\r\n"
+			"Accept:  text/html\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_HEADER_SPACES)
@@ -194,9 +212,11 @@ void test_parseHeaderLeadingSpaces()
 #define PARSE_NO_HEADERS "test_parseNoHeaders"
 void test_parseNoHeaders()
 {
-	auto req = HttpParser::parse(
-		"GET / HTTP/1.1\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET / HTTP/1.1\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_NO_HEADERS)
@@ -211,11 +231,13 @@ void test_parseNoHeaders()
 #define PARSE_BODY "test_parseBody"
 void test_parseBody()
 {
-	auto req = HttpParser::parse(
-		"POST /upload HTTP/1.1\r\n"
-		"Content-Length: 11\r\n"
-		"\r\n"
-		"hello world");
+	std::string buffer =
+			"POST /upload HTTP/1.1\r\n"
+			"Content-Length: 11\r\n"
+			"\r\n"
+			"hello world";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_BODY)
@@ -228,10 +250,12 @@ void test_parseBody()
 #define PARSE_EMPTY_BODY "test_parseEmptyBody"
 void test_parseEmptyBody()
 {
-	auto req = HttpParser::parse(
-		"GET / HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET / HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(PARSE_EMPTY_BODY)
@@ -246,10 +270,10 @@ void test_parseMultilineBody()
 {
 	std::string body = "line1\nline2\nline3";
 	std::string raw =
-		"POST /data HTTP/1.1\r\n"
-		"Content-Length: 17\r\n"
-		"\r\n"
-		+ body;
+			"POST /data HTTP/1.1\r\n"
+			"Content-Length: 17\r\n"
+			"\r\n"
+			+ body;
 
 	auto req = HttpParser::parse(raw);
 	if (!req.has_value())
@@ -265,7 +289,9 @@ void test_parseMultilineBody()
 #define EMPTY_INPUT "test_emptyInput"
 void test_emptyInput()
 {
-	auto req = HttpParser::parse("");
+	std::string buffer = "";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (req.has_value())
 		UFAIL(EMPTY_INPUT)
@@ -276,10 +302,12 @@ void test_emptyInput()
 #define BAD_METHOD "test_badMethod"
 void test_badMethod()
 {
-	auto req = HttpParser::parse(
-		"GT / HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer =
+			"GT / HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (req.has_value())
 		UFAIL(BAD_METHOD)
@@ -290,10 +318,12 @@ void test_badMethod()
 #define MISSING_PATH "test_missingPath"
 void test_missingPath()
 {
-	auto req = HttpParser::parse(
-		"GET HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (req.has_value())
 		UFAIL(MISSING_PATH)
@@ -304,10 +334,12 @@ void test_missingPath()
 #define MISSING_VERSION "test_missingVersion"
 void test_missingVersion()
 {
-	auto req = HttpParser::parse(
-		"GET /index.html\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET /index.html\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (req.has_value())
 		UFAIL(MISSING_VERSION)
@@ -318,10 +350,12 @@ void test_missingVersion()
 #define BAD_VERSION "test_badVersion"
 void test_badVersion()
 {
-	auto req = HttpParser::parse(
-		"GET / HTTZ/9.9\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET / HTTZ/9.9\r\n"
+			"Host: localhost\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (req.has_value())
 		UFAIL(BAD_VERSION)
@@ -332,7 +366,9 @@ void test_badVersion()
 #define GARBAGE_INPUT "test_garbageInput"
 void test_garbageInput()
 {
-	auto req = HttpParser::parse("lkasjdflkasjdf");
+	std::string buffer = "lkasjdflkasjdf";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (req.has_value())
 		UFAIL(GARBAGE_INPUT)
@@ -343,11 +379,13 @@ void test_garbageInput()
 #define NO_HEADER_BODY_SEP "test_noHeaderBodySeparator"
 void test_noHeaderBodySeparator()
 {
-	auto req = HttpParser::parse(
-		"POST /upload HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"Content-Length: 5\r\n"
-		"hello");
+	std::string buffer =
+			"POST /upload HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"Content-Length: 5\r\n"
+			"hello";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (req.has_value())
 		UFAIL(NO_HEADER_BODY_SEP)
@@ -358,7 +396,9 @@ void test_noHeaderBodySeparator()
 #define ONLY_METHOD "test_onlyMethod"
 void test_onlyMethod()
 {
-	auto req = HttpParser::parse("GET\r\n\r\n");
+	std::string buffer = "GET\r\n\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (req.has_value())
 		UFAIL(ONLY_METHOD)
@@ -370,10 +410,12 @@ void test_onlyMethod()
 // Test header without separator ':'
 void test_headerNoColon()
 {
-	auto req = HttpParser::parse(
-		"GET / HTTP/1.1\r\n"
-		"BadHeaderNoColon\r\n"
-		"\r\n");
+	std::string buffer =
+			"GET / HTTP/1.1\r\n"
+			"BadHeaderNoColon\r\n"
+			"\r\n";
+
+	auto req = HttpParser::parse(buffer);
 
 	if (!req.has_value())
 		UFAIL(HEADER_NO_COLON)
