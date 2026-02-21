@@ -81,14 +81,12 @@ bool HttpParser::parseQuery(HttpRequest& request, const std::string& query)
 		return true;
 	while (std::getline(stream, pair, '&'))
 	{
-		auto pos = pair.find('=');
+		auto pos = pair.find('='); // NOTE: It could be implement diferently
 		if (pos == std::string::npos)
 			continue;
 		auto key = pair.substr(0, pos);
 		auto value = pair.substr(pos + 1);
-		if (key.empty() || value.empty())
-			continue;
-		request.mquery.insert(std::make_pair(key, value));
+		request.mquery[key] = value;
 	}
 	return true;
 }
