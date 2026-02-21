@@ -438,9 +438,7 @@ void test_headerNoColon()
 
 	auto req = HttpParser::parse(buffer);
 
-	if (!req.has_value())
-		UFAIL(HEADER_NO_COLON)
-	else if (req->headers.count("BadHeaderNoColon") > 0)
+	if (req.has_value())
 		UFAIL(HEADER_NO_COLON)
 
 	UPASS(HEADER_NO_COLON)
