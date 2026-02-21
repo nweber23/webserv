@@ -9,6 +9,8 @@ bool HttpParser::parseHeader(HttpRequest& request, std::istringstream& stream)
 
 	while (std::getline(stream, line))
 	{
+		if (line[0] == '\r')
+			break;
 		if (line.empty() || line.back() != '\r')
 			return false;
 
