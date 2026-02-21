@@ -39,7 +39,7 @@ void test_getRequest_withBody()
 	auto req = conn.getRequest();
 	if (!req.has_value())
 		FAIL(BODY_TEST, fd)
-	else if (req->body == "hello world")
+	else if (req->body != "hello world")
 		FAIL(BODY_TEST, fd)
 
 	PASS(BODY_TEST, fd)
