@@ -22,7 +22,8 @@ int main(int argc, char** argv) {
 	try {
 		Config config(configPath);
 
-		for (const auto& serverCfg : config.getServers()) {
+		for (const auto& serverCfg : config.getServers())
+		{
 			auto cfg = std::make_unique<ServerConfig>(serverCfg);
 
 			// Build the middleware pipeline  (order matters!)
