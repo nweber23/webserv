@@ -78,16 +78,16 @@ bool HttpParser::parseQuery(HttpRequest& request, const std::string& query)
 	std::string pair;
 
 	if (query.empty())
-		return false;
+		return true;
 	while (std::getline(stream, pair, '&'))
 	{
 		auto pos = pair.find('=');
 		if (pos == std::string::npos)
-			return false;
+			continue;
 		auto key = pair.substr(0, pos);
 		auto value = pair.substr(pos + 1);
 		if (key.empty() || value.empty())
-			return false;
+			continue;
 		request.mquery.insert(std::make_pair(key, value));
 	}
 	return true;
@@ -140,8 +140,7 @@ bool HttpParser::parseRequestLine(
 	if (queryPos != std::string::npos) {
 		request.query = request.path.substr(queryPos + 1);
 		request.path  = request.path.substr(0, queryPos);
-		if (!parseQuery(request, request.query))
-			return false;
+		parseQuery(request, request.query);
 	}
 	return true;
 }
