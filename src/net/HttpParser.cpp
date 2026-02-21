@@ -140,7 +140,7 @@ bool HttpParser::parseRequestLine(
 	if (queryPos != std::string::npos) {
 		request.query = request.path.substr(queryPos + 1);
 		request.path  = request.path.substr(0, queryPos);
-		if (parseQuery(request, request.query))
+		if (!parseQuery(request, request.query))
 			return false;
 	}
 	return true;
