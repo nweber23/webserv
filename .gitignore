@@ -4,3 +4,5 @@ notes.*
 webserv
 *.o
 .idea
+cgi/uploads
+data
