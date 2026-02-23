@@ -25,89 +25,36 @@
             <div class="cgi-container">
                 <div class="cgi-header">
                     <h2>CGI Execution</h2>
-                    <p>Execute server-side scripts and observe the response in real-time</p>
+                    <p>Upload and execute scripts on the server</p>
                 </div>
 
                 <div class="cgi-section">
                     <div class="cgi-controls">
-                        <div class="control-group">
-                            <label for="scriptFile" class="control-label">
-                                Select Script File <span class="required">*</span>
-                            </label>
-                            <input type="file" id="scriptFile" class="control-input">
-                            <div class="input-hint">Choose a local file to upload and execute on the server</div>
-                        </div>
+                        <form method="POST" enctype="multipart/form-data" action="/cgi-bin/">
+                            <div class="control-group">
+                                <label for="scriptFile" class="control-label">
+                                    Select Script <span class="required">*</span>
+                                </label>
+                                <input type="file" id="scriptFile" name="file" class="control-input" required>
+                                <div class="input-hint">Choose any executable script to upload and run</div>
+                            </div>
 
-                        <div class="control-group">
-                            <label class="control-label">
-                                or Execute Existing
-                            </label>
-                            <input type="text" id="scriptPath" class="control-input" placeholder="e.g., /cgi-bin/hello.py">
-                            <div class="input-hint">Enter path to an existing server-side script</div>
-                        </div>
-
-                        <div class="control-group">
-                            <label for="queryInput" class="control-label">
-                                Query Parameters
-                            </label>
-                            <input type="text" id="queryInput" class="control-input" placeholder="e.g., name=value&foo=bar">
-                            <div class="input-hint">Optional: Add query parameters to the request</div>
-                        </div>
-
-                        <button id="executeBtn" class="execute-button">Execute Script</button>
+                            <button type="submit" class="execute-button">Upload & Execute</button>
+                        </form>
                     </div>
 
-                    <div class="request-flow" id="flowContainer" style="display: none;">
-                        <div class="flow-item">
-                            <div class="flow-icon">REQ</div>
-                            <div class="flow-content">
-                                <div class="flow-title">HTTP Request</div>
-                                <div class="flow-detail" id="flowRequest">Preparing request...</div>
+                    <div class="cgi-controls" style="margin-top: 2rem;">
+                        <form method="GET" action="/cgi-bin/hello.py">
+                            <div class="control-group">
+                                <label for="queryString" class="control-label">
+                                    Execute Existing Script
+                                </label>
+                                <input type="text" id="queryString" name="test" class="control-input" placeholder="e.g., hello.py">
+                                <div class="input-hint">Run a pre-existing script with query parameters</div>
                             </div>
-                        </div>
-                        <div class="flow-item">
-                            <div class="flow-icon">RUN</div>
-                            <div class="flow-content">
-                                <div class="flow-title">Script Execution</div>
-                                <div class="flow-detail" id="flowExecution">Executing CGI script...</div>
-                            </div>
-                        </div>
-                        <div class="flow-item">
-                            <div class="flow-icon">RES</div>
-                            <div class="flow-content">
-                                <div class="flow-title">HTTP Response</div>
-                                <div class="flow-detail" id="flowResponse">Receiving output...</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="output-section" id="outputSection" style="display: none;">
-                        <div class="output-header">
-                            <span>Response Output</span>
-                            <span id="statusBadge" class="status-badge pending">pending</span>
-                        </div>
-                        <div class="output-display empty" id="outputDisplay">
-                            Run a script to see the response here
-                        </div>
-                    </div>
-
-                    <div class="request-info" id="requestInfo" style="display: none;">
-                        <div class="info-row">
-                            <div class="info-label">Method</div>
-                            <div class="info-value" id="infoMethod">GET</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Endpoint</div>
-                            <div class="info-value" id="infoEndpoint">/cgi-bin/script</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Query String</div>
-                            <div class="info-value" id="infoQuery">none</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label">Response Size</div>
-                            <div class="info-value" id="infoSize">0 bytes</div>
-                        </div>
+                            <button type="submit" class="execute-button">Execute</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -117,156 +64,5 @@
     <footer>
         <p>&copy; 2026 WebSrv &mdash; 42 School</p>
     </footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const scriptFile = document.getElementById('scriptFile');
-            const scriptPath = document.getElementById('scriptPath');
-            const queryInput = document.getElementById('queryInput');
-            const executeBtn = document.getElementById('executeBtn');
-            const outputDisplay = document.getElementById('outputDisplay');
-            const outputSection = document.getElementById('outputSection');
-            const flowContainer = document.getElementById('flowContainer');
-            const requestInfo = document.getElementById('requestInfo');
-            const statusBadge = document.getElementById('statusBadge');
-
-            executeBtn.addEventListener('click', executeCGI);
-
-            function executeCGI() {
-                let scriptToExecute = null;
-
-                // Check if file is selected for upload
-                if (scriptFile.files.length > 0) {
-                    uploadAndExecute(scriptFile.files[0]);
-                    return;
-                }
-
-                // Otherwise use existing script path
-                scriptToExecute = scriptPath.value.trim();
-                if (!scriptToExecute) {
-                    alert('Please select a file to upload or enter an existing script path');
-                    return;
-                }
-
-                executeScript(scriptToExecute);
-            }
-
-            function uploadAndExecute(file) {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                // Show upload status
-                outputSection.style.display = 'block';
-                flowContainer.style.display = 'block';
-                requestInfo.style.display = 'block';
-                outputDisplay.classList.add('empty');
-                outputDisplay.textContent = 'Uploading file...';
-                statusBadge.textContent = 'pending';
-                statusBadge.className = 'status-badge pending';
-                executeBtn.disabled = true;
-                executeBtn.classList.add('loading');
-
-                document.getElementById('infoMethod').textContent = 'POST (Upload)';
-                document.getElementById('infoEndpoint').textContent = '/cgi-bin/';
-                document.getElementById('flowRequest').textContent = 'Uploading: ' + file.name;
-
-                // Upload to /cgi-bin/
-                fetch('/cgi-bin/', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Upload failed: HTTP ' + response.status);
-                        }
-                        return response.text();
-                    })
-                    .then(result => {
-                        document.getElementById('flowExecution').textContent = 'Upload complete, executing...';
-
-                        // Now execute the uploaded file
-                        const uploadedPath = '/cgi-bin/' + file.name;
-                        executeScript(uploadedPath);
-                    })
-                    .catch(error => {
-                        outputDisplay.classList.remove('empty');
-                        outputDisplay.classList.add('output-error');
-                        outputDisplay.textContent = 'Upload Error: ' + error.message;
-                        document.getElementById('flowResponse').textContent = 'Error: ' + error.message;
-                        statusBadge.textContent = 'error';
-                        statusBadge.className = 'status-badge error';
-                        executeBtn.disabled = false;
-                        executeBtn.classList.remove('loading');
-                    });
-            }
-
-            function executeScript(script) {
-                const query = queryInput.value;
-                const fullPath = query ? script + '?' + query : script;
-
-                // Show UI elements
-                outputSection.style.display = 'block';
-                flowContainer.style.display = 'block';
-                requestInfo.style.display = 'block';
-
-                // Update request info
-                document.getElementById('infoMethod').textContent = 'GET';
-                document.getElementById('infoEndpoint').textContent = script;
-                document.getElementById('infoQuery').textContent = query || 'none';
-
-                // Update flow
-                document.getElementById('flowRequest').textContent = fullPath;
-                document.getElementById('flowExecution').textContent = 'Running ' + script.split('/').pop();
-
-                // Reset output
-                outputDisplay.classList.add('empty');
-                outputDisplay.textContent = 'Executing script...';
-                statusBadge.textContent = 'pending';
-                statusBadge.className = 'status-badge pending';
-                executeBtn.disabled = true;
-                executeBtn.classList.add('loading');
-
-                // Execute via fetch
-                fetch(fullPath)
-                    .then(response => {
-                        const size = response.headers.get('content-length') || 'unknown';
-                        document.getElementById('infoSize').textContent = size + ' bytes';
-
-                        if (!response.ok) {
-                            throw new Error('HTTP ' + response.status);
-                        }
-                        return response.text();
-                    })
-                    .then(data => {
-                        outputDisplay.classList.remove('empty');
-                        outputDisplay.textContent = data;
-                        document.getElementById('flowResponse').textContent = 'Response received: ' + (data.length) + ' bytes';
-
-                        statusBadge.textContent = 'success';
-                        statusBadge.className = 'status-badge success';
-                    })
-                    .catch(error => {
-                        outputDisplay.classList.remove('empty');
-                        outputDisplay.classList.add('output-error');
-                        outputDisplay.textContent = 'Error: ' + error.message;
-                        document.getElementById('flowResponse').textContent = 'Error: ' + error.message;
-
-                        statusBadge.textContent = 'error';
-                        statusBadge.className = 'status-badge error';
-                    })
-                    .finally(() => {
-                        executeBtn.disabled = false;
-                        executeBtn.classList.remove('loading');
-                    });
-            }
-
-            // Allow Enter key to execute
-            queryInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    executeCGI();
-                }
-            });
-        });
-    </script>
 </body>
 </html>
