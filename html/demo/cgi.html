@@ -25,36 +25,89 @@
             <div class="cgi-container">
                 <div class="cgi-header">
                     <h2>CGI Execution</h2>
-                    <p>Upload and execute scripts on the server</p>
+                    <p>Execute server-side scripts and observe the response in real-time</p>
                 </div>
 
                 <div class="cgi-section">
                     <div class="cgi-controls">
-                        <form method="POST" enctype="multipart/form-data" action="/cgi-bin/">
-                            <div class="control-group">
-                                <label for="scriptFile" class="control-label">
-                                    Select Script <span class="required">*</span>
-                                </label>
-                                <input type="file" id="scriptFile" name="file" class="control-input" required>
-                                <div class="input-hint">Choose any executable script to upload and run</div>
-                            </div>
+                        <div class="control-group">
+                            <label for="scriptFile" class="control-label">
+                                Select Script <span class="required">*</span>
+                            </label>
+                            <input type="file" id="scriptFile" class="control-input">
+                            <div class="input-hint">Choose a local script to upload and execute</div>
+                        </div>
 
-                            <button type="submit" class="execute-button">Upload & Execute</button>
-                        </form>
+                        <div class="control-group">
+                            <label for="scriptPath" class="control-label">
+                                or Script Path
+                            </label>
+                            <input type="text" id="scriptPath" class="control-input" placeholder="e.g., /cgi-bin/hello.py">
+                            <div class="input-hint">Enter an existing script path on the server</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="queryInput" class="control-label">
+                                Query Parameters
+                            </label>
+                            <input type="text" id="queryInput" class="control-input" placeholder="e.g., name=value&foo=bar">
+                            <div class="input-hint">Optional: Add query parameters to the request</div>
+                        </div>
+
+                        <button id="executeBtn" class="execute-button">Execute Script</button>
                     </div>
 
-                    <div class="cgi-controls" style="margin-top: 2rem;">
-                        <form method="GET" action="/cgi-bin/hello.py">
-                            <div class="control-group">
-                                <label for="queryString" class="control-label">
-                                    Execute Existing Script
-                                </label>
-                                <input type="text" id="queryString" name="test" class="control-input" placeholder="e.g., hello.py">
-                                <div class="input-hint">Run a pre-existing script with query parameters</div>
+                    <div class="request-flow" id="flowContainer" style="display: none;">
+                        <div class="flow-item">
+                            <div class="flow-icon">REQ</div>
+                            <div class="flow-content">
+                                <div class="flow-title">HTTP Request</div>
+                                <div class="flow-detail" id="flowRequest">Preparing request...</div>
                             </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-icon">RUN</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Script Execution</div>
+                                <div class="flow-detail" id="flowExecution">Executing CGI script...</div>
+                            </div>
+                        </div>
+                        <div class="flow-item">
+                            <div class="flow-icon">RES</div>
+                            <div class="flow-content">
+                                <div class="flow-title">HTTP Response</div>
+                                <div class="flow-detail" id="flowResponse">Receiving output...</div>
+                            </div>
+                        </div>
+                    </div>
 
-                            <button type="submit" class="execute-button">Execute</button>
-                        </form>
+                    <div class="output-section" id="outputSection" style="display: none;">
+                        <div class="output-header">
+                            <span>Response Output</span>
+                            <span id="statusBadge" class="status-badge pending">pending</span>
+                        </div>
+                        <div class="output-display empty" id="outputDisplay">
+                            Run a script to see the response here
+                        </div>
+                    </div>
+
+                    <div class="request-info" id="requestInfo" style="display: none;">
+                        <div class="info-row">
+                            <div class="info-label">Method</div>
+                            <div class="info-value" id="infoMethod">GET</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Endpoint</div>
+                            <div class="info-value" id="infoEndpoint">/cgi-bin/script</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Query String</div>
+                            <div class="info-value" id="infoQuery">none</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Response Size</div>
+                            <div class="info-value" id="infoSize">0 bytes</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -64,5 +117,7 @@
     <footer>
         <p>&copy; 2026 WebSrv &mdash; 42 School</p>
     </footer>
+
+    <script src="cgi.js"></script>
 </body>
 </html>
