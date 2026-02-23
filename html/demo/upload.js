@@ -47,22 +47,47 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/data')
             .then(response => response.text())
             .then(html => {
+                const files = [];
+
+                // Parse HTML for links
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 const links = doc.querySelectorAll('a');
-                const files = [];
 
                 links.forEach(link => {
                     const href = link.getAttribute('href');
-                    if (href && href !== '../' && !href.startsWith('?')) {
-                        const fileName = href.replace(/\/$/, '');
-                        files.push(fileName);
+                    const text = link.textContent.trim();
+
+                    if (href && text) {
+                        // Skip parent directory and special files
+                        if (text === '..' || text === '/' || text === '.gitkeep' || text === './' || href === '../') {
+                            return;
+                        }
+
+                        // Use href if it looks like a file, otherwise use text
+                        let fileName = href;
+
+                        // Clean up the filename
+                        fileName = fileName
+                            .replace(/^\.\//, '')     // Remove ./
+                            .replace(/^\/data\/?/, '')  // Remove /data prefix
+                            .replace(/\/$/, '')         // Remove trailing slash
+                            .trim();
+
+                        // Skip empty and invalid filenames
+                        if (fileName && fileName.length > 0 && fileName !== '..') {
+                            files.push(fileName);
+                        }
                     }
                 });
+
+                // Debug: log what we found
+                console.log('Found files:', files);
 
                 renderFiles(files);
             })
             .catch(error => {
+                console.error('Error loading files:', error);
                 filesList.innerHTML = '<div class="files-empty">Error loading files</div>';
             });
     }
@@ -76,17 +101,22 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        filesList.innerHTML = files.map(file => `
-            <div class="file-item">
-                <div class="file-info">
-                    <span class="file-name">${escapeHtml(file)}</span>
+        filesList.innerHTML = files.map(file => {
+            const encodedFile = encodeURIComponent(file);
+            const downloadUrl = '/data/' + encodedFile;
+            const safeFileName = file.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            return `
+                <div class="file-item">
+                    <div class="file-info">
+                        <span class="file-name">${escapeHtml(file)}</span>
+                    </div>
+                    <div class="file-actions">
+                        <a href="${downloadUrl}" class="btn-small" download>Download</a>
+                        <button class="btn-small btn-delete" onclick="deleteFile('${safeFileName}')">Delete</button>
+                    </div>
                 </div>
-                <div class="file-actions">
-                    <a href="/data/${encodeURIComponent(file)}" class="btn-small" download>Download</a>
-                    <button class="btn-small btn-delete" onclick="deleteFile('${escapeHtml(file)}')">Delete</button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     /**
