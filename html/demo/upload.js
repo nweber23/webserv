@@ -40,11 +40,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Fetch the directory listing from /uploads
+     * Fetch the directory listing from /data
      * Server returns HTML, we parse it to get file list
      */
     function loadFiles() {
-        fetch('/uploads')
+        fetch('/data')
             .then(response => response.text())
             .then(html => {
                 const parser = new DOMParser();
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="file-name">${escapeHtml(file)}</span>
                 </div>
                 <div class="file-actions">
-                    <a href="/uploads/${encodeURIComponent(file)}" class="btn-small" download>Download</a>
+                    <a href="/data/${encodeURIComponent(file)}" class="btn-small" download>Download</a>
                     <button class="btn-small btn-delete" onclick="deleteFile('${escapeHtml(file)}')">Delete</button>
                 </div>
             </div>
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Upload file to /uploads endpoint
+     * Upload file to /data endpoint
      * Server receives POST request and stores the file
      */
     function uploadFile() {
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadBtn.classList.add('loading');
         showMessage('Uploading ' + file.name + '...', 'pending');
 
-        fetch('/uploads', {
+        fetch('/data', {
             method: 'POST',
             body: formData
         })
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch('/uploads/' + encodeURIComponent(fileName), {
+        fetch('/data/' + encodeURIComponent(fileName), {
             method: 'DELETE'
         })
             .then(response => {
