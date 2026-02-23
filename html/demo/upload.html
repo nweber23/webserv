@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSrv &mdash; File Upload Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">WebSrv</div>
+            <ul class="nav-links">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="../index.html#features" class="nav-link">Capabilities</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="upload-hero">
+            <div class="upload-container">
+                <div class="upload-header">
+                    <h2>File Upload & Download</h2>
+                    <p>Upload files to the server, download them, or remove them</p>
+                </div>
+
+                <div class="upload-section">
+                    <div id="uploadMessage" class="upload-message"></div>
+
+                    <div class="upload-controls">
+                        <div class="control-group">
+                            <label for="fileInput" class="control-label">
+                                Select File <span class="required">*</span>
+                            </label>
+                            <input type="file" id="fileInput" class="control-input">
+                            <div class="input-hint">Choose any file to upload to the server</div>
+                        </div>
+
+                        <button id="uploadBtn" class="upload-button">Upload File</button>
+                    </div>
+
+                    <div class="files-section">
+                        <div class="files-header">Available Files</div>
+                        <div class="files-list" id="filesList">
+                            <div class="files-empty">Loading files...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 WebSrv &mdash; 42 School</p>
+    </footer>
+
+    <script src="upload.js"></script>
+</body>
+</html>
