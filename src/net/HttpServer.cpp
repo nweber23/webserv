@@ -112,7 +112,7 @@ void HttpServer::_initialConnection(int listenFd)
 	clientEvent.events = EPOLLIN | EPOLLHUP;
 	clientEvent.data.fd = clientFd;
 
-	_connections[clientFd] = std::make_unique<HttpConnection>(clientFd);
+	_connections[clientFd] = std::make_shared<HttpConnection>(clientFd);
 	epoll_ctl(_epfd, EPOLL_CTL_ADD, clientFd, &clientEvent);
 }
 
