@@ -41,7 +41,7 @@ std::string CookieMiddleware::_extractFormValue(const std::string& body, const s
 
 bool CookieMiddleware::handle(HttpRequest& request, HttpResponse& response)
 {
-  if (request.method != "POST" || request.path != "/cookies.html")
+  if (request.method != "POST" || request.path != "/demo/cookies.html")
     return callNext(request, response);
 
   std::string action = _extractFormValue(request.body, "action");
