@@ -8,14 +8,14 @@
 
 
 HttpConnection::HttpConnection(int fd)
-	: _fd(fd), _state(NEW), _headerSize(std::string::npos)
+	: _fd(fd), _headerSize(std::string::npos), _state(NEW)
 {}
 
 HttpConnection::HttpConnection(const HttpConnection& other)
 	: _fd(other._fd),
 	_buffer(other._buffer),
-	_state(other._state),
-	_headerSize(std::string::npos) 
+	_headerSize(std::string::npos),
+	_state(other._state)
 {}
 
 HttpConnection HttpConnection::operator=(const HttpConnection& other)
