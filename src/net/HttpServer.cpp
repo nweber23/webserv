@@ -123,8 +123,8 @@ void HttpServer::_closeConnectionOnError(int fd)
 	auto connection = _connections[fd];
 	_errorHandler->buildErrorResponse(InternalServerError, errorResponse);
 	connection->queueResponse(errorResponse);
-	close(fd);
 	epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+	close(fd);
 	_connections.erase(fd);
 }
 
@@ -144,8 +144,8 @@ void HttpServer::_handleInited(int fd)
 		{
 			auto response = _app->handle(request.value());
 			connection->queueResponse(response);
-			close(fd);
 			epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+			close(fd);
 			_connections.erase(fd);
 		}
 		else 
