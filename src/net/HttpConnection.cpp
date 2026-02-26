@@ -14,7 +14,7 @@ HttpConnection::HttpConnection(int fd)
 HttpConnection::HttpConnection(const HttpConnection& other)
 	: _fd(other._fd),
 	_buffer(other._buffer),
-	_headerSize(other._buffer),
+	_headerSize(other._headerSize),
 	_state(other._state)
 {}
 
