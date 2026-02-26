@@ -14,7 +14,7 @@ HttpConnection::HttpConnection(int fd)
 HttpConnection::HttpConnection(const HttpConnection& other)
 	: _fd(other._fd),
 	_buffer(other._buffer),
-	_headerSize(std::string::npos),
+	_headerSize(other._buffer),
 	_state(other._state)
 {}
 
