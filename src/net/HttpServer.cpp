@@ -125,6 +125,7 @@ void HttpServer::_closeConnectionOnError(int fd)
 	connection->queueResponse(errorResponse);
 	close(fd);
 	epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+	_connections.erase(fd);
 }
 
 void HttpServer::_handleInited(int fd)
@@ -145,6 +146,7 @@ void HttpServer::_handleInited(int fd)
 			connection->queueResponse(response);
 			close(fd);
 			epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+			_connections.erase(fd);
 		}
 		else 
 		{
