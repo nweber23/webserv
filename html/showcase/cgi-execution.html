@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSrv - Dynamic CGI Execution</title>
+    <title>WebSrv &mdash; CGI Execution</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -22,8 +22,8 @@
 
     <main>
         <section class="showcase-header">
-            <h1>Dynamic CGI Execution</h1>
-            <p>Execute server-side scripts with full environment variable support</p>
+            <h1>CGI Execution</h1>
+            <p>Server-side script execution with full environment variable support</p>
         </section>
 
         <div class="showcase-container">
@@ -33,17 +33,17 @@
                 </div>
 
                 <div class="showcase-example">
-                    <h3>Example Request</h3>
+                    <h3>Request</h3>
                     <pre><code>POST /cgi-bin/script.py HTTP/1.1
 Host: localhost:8080
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 19
 
-name=John&age=30</code></pre>
+name=John&amp;age=30</code></pre>
                 </div>
 
                 <div class="showcase-example">
-                    <h3>CGI Script (Python Example)</h3>
+                    <h3>CGI Script (Python)</h3>
                     <pre><code>#!/usr/bin/env python3
 import os
 import sys
@@ -56,23 +56,23 @@ print(f'{{"greeting": "Hello {name}"}}')</code></pre>
                 </div>
 
                 <div class="showcase-example">
-                    <h3>Server Response</h3>
+                    <h3>Response</h3>
                     <pre><code>HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Length: 29
 
-{"greeting": "Hello John&age=30"}</code></pre>
+{"greeting": "Hello John&amp;age=30"}</code></pre>
                 </div>
 
                 <div class="showcase-features">
-                    <h3>Key Features</h3>
+                    <h3>Features</h3>
                     <ul>
                         <li>Full HTTP environment variable setup (REQUEST_METHOD, PATH_INFO, QUERY_STRING, etc.)</li>
                         <li>Request body passed via stdin to script</li>
-                        <li>Support for multiple interpreters (Python, Perl, Bash, etc.)</li>
+                        <li>Support for multiple interpreters (Python, Perl, Bash)</li>
                         <li>Configurable per file extension</li>
                         <li>EOF handling for chunked requests</li>
-                        <li>Proper process management with fork()</li>
+                        <li>Process management with fork()</li>
                         <li>Script execution in correct directory</li>
                         <li>Response header and body processing</li>
                     </ul>
@@ -82,7 +82,7 @@ Content-Length: 29
     </main>
 
     <footer>
-        <p>&copy; 2026 WebSrv Project — 42 School</p>
+        <p>&copy; 2026 WebSrv &mdash; 42 School</p>
     </footer>
 
     <script src="../script.js"></script>
