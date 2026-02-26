@@ -12,6 +12,7 @@ class HttpConnection : public IHttpConnection
 private:
 	int _fd;
 	std::string _buffer;
+	size_t _headerSize;
 
 	typedef enum State
 	{
@@ -28,7 +29,9 @@ private:
 
 	static const size_t MAX_BUFFER_SIZE = 268435456; // 256 MB
 
-	bool _reciveMessage();
+	bool reciveMessage();
+	bool isCompletedBody(size_t contentSize);
+	std::optional<size_t> getContentSize();
 
 public:
 	HttpConnection() = delete;

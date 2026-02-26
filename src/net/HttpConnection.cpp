@@ -1,6 +1,7 @@
 #include "net/HttpConnection.hpp"
 #include "net/HttpParser.hpp"
 #include "net/HttpSerializer.hpp"
+#include <sys/socket.h>
 #include <unistd.h>
 #include <sstream>
 #include <cstdlib>
@@ -21,6 +22,7 @@ HttpConnection HttpConnection::operator=(const HttpConnection& other)
 		_fd     = other._fd;
 		_buffer = other._buffer;
 		_state  = other._state;
+		_headerSize = other._headerSize;
 	}
 	return *this;
 }
@@ -28,83 +30,81 @@ HttpConnection HttpConnection::operator=(const HttpConnection& other)
 HttpConnection::~HttpConnection()
 {}
 
-bool HttpConnection::_reciveMessage()
+bool HttpConnection::reciveMessage()
 {
 	char buf[4096];
-	ssize_t n = read(_fd, buf, sizeof(buf));
-	if (n <= 0) {
-		if (n < 0)
-			_state = ERROR;
+	ssize_t n = 0;
+		
+	while (true)
+	{
+		n = ::recv(_fd, buf, sizeof(buf), 0);
+		if (n > 0)
+		{
+			_buffer.append(buf, buf + n);
+			continue;
+		}
+		else if (n == 0 || (errno == EAGAIN || errno == EWOULDBLOCK))
+		{
+			break;
+		}
+		_state = HttpConnection::ERROR;
 		return false;
 	}
-
-	// Check if buffer would exceed maximum size (overflow-safe)
-	size_t currentSize = _buffer.size();
-	size_t readSize = static_cast<size_t>(n);
-	if (currentSize > MAX_BUFFER_SIZE || readSize > MAX_BUFFER_SIZE - currentSize) {
-		_state = ERROR;
+	_headerSize = _buffer.find("\r\n\r\n");
+	if (_headerSize == std::string::npos)
+	{
+		_state = HttpConnection::WAITING;
 		return false;
 	}
-
-	_buffer.append(buf, readSize);
+	_headerSize += 4;
+	_state = HttpConnection::HANDLED;
 	return true;
+}
+
+std::optional<size_t> HttpConnection::getContentSize()
+{	
+	size_t contentPos = _buffer.find("Content-Length: ");
+	size_t size = 0;
+
+	if (contentPos == std::string::npos)
+	{
+		return 0;
+	}
+
+	std::string contentSizeStr = _buffer.substr(contentPos + 16);
+	try 
+	{
+		size = std::stoul(contentSizeStr);
+	}
+	catch(...)
+	{
+		return std::nullopt;
+	}
+	return size;
+}
+
+bool HttpConnection::isCompletedBody(size_t contentSize)
+{
+	size_t messageSize = _headerSize + contentSize;
+
+	return _buffer.size() == messageSize;
 }
 
 bool HttpConnection::readIntoBuffer()
 {
-	if (!_reciveMessage())
+	if (!reciveMessage())
 	{
 		return false;
 	}
 
-	// Find end of headers
-	size_t headerEnd = _buffer.find("\r\n\r\n");
-	if (headerEnd == std::string::npos)
+	auto size = getContentSize();
+	if (!size.has_value())
 	{
-		_state = WAITING;
+		_state = ERROR;
 		return false;
 	}
 
-	// Parse headers to find Content-Length
-	std::istringstream stream(_buffer);
-	std::string line;
-	int contentLength = -1;
-
-	// Skip request line
-	std::getline(stream, line);
-
-	// Read headers to find Content-Length
-	while (std::getline(stream, line))
-	{
-		if (!line.empty() && line.back() == '\r')
-			line.pop_back();
-		if (line.empty())
-			break;
-
-		// Check for Content-Length header (case-sensitive)
-		const char* contentLenStr = "Content-Length:";
-		if (line.size() >= 15 && line.substr(0, 15) == contentLenStr)
-		{
-			std::string lenStr = line.substr(15);
-			// Trim leading spaces
-			size_t start = lenStr.find_first_not_of(" \t");
-			if (start != std::string::npos)
-			{
-				contentLength = std::atoi(lenStr.substr(start).c_str());
-			}
-		}
-	}
-
-	// If no Content-Length header found, assume GET or empty body
-	if (contentLength < 0)
-		contentLength = 0;
-
-	// Calculate expected total message size
-	size_t headerAndEmptyLine = headerEnd + 4; // +4 for \r\n\r\n
-	size_t expectedSize = headerAndEmptyLine + contentLength;
-
-	// Check if we have the complete message
-	if (_buffer.size() >= expectedSize)
+	if (isCompletedBody(size.value()))
 	{
 		_state = HANDLED;
 		return true;
