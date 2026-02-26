@@ -43,6 +43,11 @@ bool HttpConnection::reciveMessage()
 		n = ::recv(_fd, buf, sizeof(buf), 0);
 		if (n > 0)
 		{
+			if (_buffer.size() + n > MAX_BUFFER_SIZE)
+			{
+				_state = HttpConnection::ERROR;
+				return false;
+			}
 			_buffer.append(buf, buf + n);
 			continue;
 		}

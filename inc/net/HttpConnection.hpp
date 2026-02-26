@@ -27,7 +27,7 @@ private:
 	// std::unique_ptr<IHttpReader> _reader;
 	// std::unique_ptr<IHttpWriter> _writer;
 
-	static const size_t MAX_BUFFER_SIZE = 268435456; // 256 MB
+	static const size_t MAX_BUFFER_SIZE = 256 * 1024 * 1024; // 256 MB
 
 	bool reciveMessage();
 	bool isCompletedBody(size_t contentSize);
