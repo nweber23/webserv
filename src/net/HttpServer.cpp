@@ -10,16 +10,16 @@
 #include <unistd.h>
 #include <iostream>
 #include <string>
+#include <cerrno>
 #define MAX_EVENTS 64
 
-HttpResponse error()
-{
-	return HttpResponse {};	
-}
 
-HttpServer::HttpServer(std::unique_ptr<ServerConfig> config)
+HttpServer::HttpServer(
+	std::unique_ptr<ServerConfig> config,
+	std::shared_ptr<ErrorPageHandler> errorHandler) :
+	_config(std::move(config)),
+	_errorHandler(errorHandler)
 {
-	_config = std::move(config);
 	_setup();
 }
 
@@ -113,8 +113,20 @@ void HttpServer::_initialConnection(int listenFd)
 	clientEvent.events = EPOLLIN | EPOLLHUP;
 	clientEvent.data.fd = clientFd;
 
-	_connections[clientFd] = new HttpConnection(clientFd);
+	_connections[clientFd] = std::make_shared<HttpConnection>(clientFd);
 	epoll_ctl(_epfd, EPOLL_CTL_ADD, clientFd, &clientEvent);
+}
+
+void HttpServer::_closeConnectionOnError(int fd)
+{
+	HttpResponse  errorResponse;
+	
+	auto connection = _connections[fd];
+	_errorHandler->buildErrorResponse(InternalServerError, errorResponse);
+	connection->queueResponse(errorResponse);
+	epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+	close(fd);
+	_connections.erase(fd);
 }
 
 void HttpServer::_handleInited(int fd)
@@ -129,17 +141,23 @@ void HttpServer::_handleInited(int fd)
 	if (connection->readIntoBuffer())
 	{
 		auto request = connection->getRequest();
-		auto response = _app->handle(request);
-		connection->queueResponse(response);
-		close(fd);
-		epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+		if (request.has_value())
+		{
+			auto response = _app->handle(request.value());
+			connection->queueResponse(response);
+			epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+			close(fd);
+			_connections.erase(fd);
+		}
+		else 
+		{
+			_closeConnectionOnError(fd);
+			return;
+		}
 	}
-	//TODO: Not finished error handle in that cases
 	if (connection->isError())
 	{
-		connection->queueResponse(error());
-		close(fd);
-		epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+		_closeConnectionOnError(fd);
 	}
 }
 

@@ -11,6 +11,7 @@ struct HttpRequest
     std::string path;                // "/index.html"
     std::string query;               // "a=1&b=2" (after ?)
     std::string version;             // "HTTP/1.1"
+	std::map<std::string, std::string> mquery;
     std::map<std::string, std::string> headers;
     std::string body;
 

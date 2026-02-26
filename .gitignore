@@ -3,6 +3,7 @@ todo.txt
 notes.*
 webserv
 *.o
+test_runner
 .idea
 cgi/uploads
 data

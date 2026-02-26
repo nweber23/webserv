@@ -3,7 +3,7 @@
 #include "IHttpConnection.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
-
+#include <optional>
 #include <memory>
 #include <string>
 
@@ -12,6 +12,7 @@ class HttpConnection : public IHttpConnection
 private:
 	int _fd;
 	std::string _buffer;
+	size_t _headerSize;
 
 	typedef enum State
 	{
@@ -26,9 +27,11 @@ private:
 	// std::unique_ptr<IHttpReader> _reader;
 	// std::unique_ptr<IHttpWriter> _writer;
 
-	static const size_t MAX_BUFFER_SIZE = 268435456; // 256 MB
+	static const size_t MAX_BUFFER_SIZE = 256 * 1024 * 1024; // 256 MB
 
-	bool _reciveMessage();
+	bool reciveMessage();
+	bool isCompletedBody(size_t contentSize);
+	std::optional<size_t> getContentSize();
 
 public:
 	HttpConnection() = delete;
@@ -39,10 +42,11 @@ public:
 	HttpConnection(int fd);
 
 	bool readIntoBuffer() override;
-	bool isCompleted() override;
-	bool isError() override;
+	bool isCompleted() const override;
+	bool isWaiting() const override;
+	bool isError() const override;
 
-    HttpRequest getRequest() const override;
+    std::optional<HttpRequest> getRequest() override;
     void queueResponse(const HttpResponse& response) override;
 };
 

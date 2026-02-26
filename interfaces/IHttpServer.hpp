@@ -7,8 +7,6 @@
 
 class IHttpServer
 {
-private:
-/* data */
 public:
     IHttpServer() = default;
     IHttpServer(const IHttpServer&) = default;

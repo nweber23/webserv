@@ -3,6 +3,7 @@
 #include "IHttpConnection.hpp"
 #include "IHttpServer.hpp"
 #include "IHttpApp.hpp"
+#include "ErrorPageHandler.hpp"
 #include "Parsing.hpp"
 #include <sys/epoll.h>
 #include <memory>
@@ -17,9 +18,11 @@ private:
 
 	// std::unordered_map just for remember
 	// For me it make no sence without threads
-	std::map<int, IHttpConnection*> _connections;
+	std::map<int, std::shared_ptr<IHttpConnection>> _connections;
 	std::unique_ptr<ServerConfig> _config;
 	std::unique_ptr<IHttpApp> _app;
+
+	std::shared_ptr<ErrorPageHandler> _errorHandler;
 
 	void _setup();
 	void _setNonBlocking(int fd);
@@ -27,14 +30,18 @@ private:
 	void _initialConnection(int listenFd);
 	void _handleInited(int fd);
 	void _handleEpollQue(struct epoll_event *que, int size);
+	void _closeConnectionOnError(int fd);
 
 public:
-	HttpServer();
-	HttpServer(const HttpServer& other);
-	HttpServer operator=(const HttpServer& other);
+	HttpServer() = delete;
+	HttpServer(const HttpServer& other) = delete;
+	HttpServer operator=(const HttpServer& other) = delete;
 	~HttpServer() override;
 
-	HttpServer(std::unique_ptr<ServerConfig> config);
+	HttpServer(
+		std::unique_ptr<ServerConfig> config,
+		std::shared_ptr<ErrorPageHandler> errorHandler);
+
 	void setApp(std::unique_ptr<IHttpApp>) override;
 	void run() override;
 };

@@ -11,7 +11,8 @@ StaticFileMiddleware::StaticFileMiddleware(
 
 // Maps the request URL to a filesystem path:
 //   root + (requestPath minus locationPrefix)
-std::string StaticFileMiddleware::resolveFilePath(const HttpRequest& request) const {
+std::string StaticFileMiddleware::resolveFilePath(const HttpRequest& request) const
+{
 	const auto* loc = request.location;
 	std::string root = loc->root;
 	std::string relPath = request.path.substr(loc->path.size());
@@ -20,7 +21,8 @@ std::string StaticFileMiddleware::resolveFilePath(const HttpRequest& request) co
 	return root + relPath;
 }
 
-std::string StaticFileMiddleware::guessMimeType(const std::string& path) {
+std::string StaticFileMiddleware::guessMimeType(const std::string& path)
+{
 	size_t dot = path.rfind('.');
 	if (dot == std::string::npos) return "application/octet-stream";
 	std::string ext = path.substr(dot);
@@ -40,7 +42,8 @@ std::string StaticFileMiddleware::guessMimeType(const std::string& path) {
 }
 
 bool StaticFileMiddleware::serveFile(const std::string& filePath,
-                                  HttpResponse& response) const {
+                                  HttpResponse& response) const
+{
 	std::ifstream file(filePath, std::ios::binary);
 	if (!file.is_open()) {
 		_errorHandler->buildErrorResponse(NotFound, response);
@@ -59,9 +62,11 @@ bool StaticFileMiddleware::serveFile(const std::string& filePath,
 bool StaticFileMiddleware::generateDirectoryListing(
 		const std::string& dirPath,
 		const std::string& requestPath,
-		HttpResponse& response) const {
+		HttpResponse& response) const
+{
 	DIR* dir = opendir(dirPath.c_str());
-	if (!dir) {
+	if (!dir)
+	{
 		_errorHandler->buildErrorResponse(InternalServerError, response);
 		return true;
 	}
@@ -78,7 +83,8 @@ bool StaticFileMiddleware::generateDirectoryListing(
 		html << "<a href=\"../\">../</a>\n";
 
 	struct dirent* entry;
-	while ((entry = readdir(dir)) != nullptr) {
+	while ((entry = readdir(dir)) != nullptr)
+	{
 		std::string name = entry->d_name;
 		if (name == "." || name == "..") continue;
 
@@ -101,7 +107,8 @@ bool StaticFileMiddleware::generateDirectoryListing(
 	return true;
 }
 
-bool StaticFileMiddleware::handle(HttpRequest& request, HttpResponse& response) {
+bool StaticFileMiddleware::handle(HttpRequest& request, HttpResponse& response)
+{
 	if (!request.location)
 		return callNext(request, response);
 
@@ -117,14 +124,17 @@ bool StaticFileMiddleware::handle(HttpRequest& request, HttpResponse& response) 
 	std::string filePath = resolveFilePath(request);
 
 	struct stat st;
-	if (stat(filePath.c_str(), &st) != 0) {
+	if (stat(filePath.c_str(), &st) != 0)
+	{
 		_errorHandler->buildErrorResponse(NotFound, response);
 		return true;
 	}
 
-	if (S_ISDIR(st.st_mode)) {
+	if (S_ISDIR(st.st_mode))
+	{
 		// Try each configured index file
-		for (const auto& idx : request.location->index) {
+		for (const auto& idx : request.location->index)
+		{
 			std::string indexPath = filePath;
 			if (indexPath.back() != '/') indexPath += '/';
 			indexPath += idx;

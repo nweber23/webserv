@@ -23,7 +23,8 @@ int main(int argc, char** argv) {
 	try {
 		Config config(configPath);
 
-		for (const auto& serverCfg : config.getServers()) {
+		for (const auto& serverCfg : config.getServers())
+		{
 			auto cfg = std::make_unique<ServerConfig>(serverCfg);
 
 			// Build the middleware pipeline  (order matters!)
@@ -55,6 +56,7 @@ int main(int argc, char** argv) {
 			//  8. NotFoundMiddleware ── send error response
 			//
 			auto app = std::make_unique<HttpApp>(*cfg);
+
 			auto errorHandler = std::make_shared<ErrorPageHandler>(*cfg);
 			app->use(std::make_unique<LocationRouter>(cfg->locations, errorHandler));
 			app->use(std::make_unique<BodySizeValidationMiddleware>(*cfg));
@@ -66,7 +68,7 @@ int main(int argc, char** argv) {
 			app->use(std::make_unique<StaticFileMiddleware>(errorHandler));
 			app->use(std::make_unique<NotFoundMiddleware>(errorHandler));
 
-			auto server = std::make_unique<HttpServer>(std::move(cfg));
+			auto server = std::make_unique<HttpServer>(std::move(cfg), errorHandler);
 			server->setApp(std::move(app));
 
 			std::cout << "Starting server '" << serverCfg.server_name
