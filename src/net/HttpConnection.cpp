@@ -90,7 +90,7 @@ bool HttpConnection::isCompletedBody(size_t contentSize)
 {
 	size_t messageSize = _headerSize + contentSize;
 
-	return _buffer.size() == messageSize;
+	return _buffer.size() >= messageSize;
 }
 
 bool HttpConnection::readIntoBuffer()
