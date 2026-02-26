@@ -33,9 +33,9 @@ private:
 	void _closeConnectionOnError(int fd);
 
 public:
-	HttpServer();
-	HttpServer(const HttpServer& other);
-	HttpServer operator=(const HttpServer& other);
+	HttpServer() = delete;
+	HttpServer(const HttpServer& other) = delete;
+	HttpServer operator=(const HttpServer& other) = delete;
 	~HttpServer() override;
 
 	HttpServer(
