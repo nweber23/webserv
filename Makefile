@@ -69,4 +69,4 @@ test: build-test
 party:
 	@curl parrot.live
 
-.PHONY: all clean fclean re party build-test build-gtest gtest test
+.PHONY: all clean fclean re party build-test test
