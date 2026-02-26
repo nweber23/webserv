@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <string>
+#include <cerrno>
 #define MAX_EVENTS 64
 
 
