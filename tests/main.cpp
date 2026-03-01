@@ -5,7 +5,10 @@ int main()
 {
 	std::cout << "============== HttpConnection class ===============\n" << std::endl;
 	test_HttpConnectionTests();
-	
+
+	std::cout << "============== Timeout Handling ===============\n" << std::endl;
+	test_TimeoutTests();
+
 	std::cout << "============== HttpParser class ===============\n" << std::endl;
 	test_HttpParserTests();
 }

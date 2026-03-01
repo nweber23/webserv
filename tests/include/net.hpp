@@ -12,3 +12,4 @@
 
 void test_HttpConnectionTests(void);
 void test_HttpParserTests(void);
+void test_TimeoutTests(void);
