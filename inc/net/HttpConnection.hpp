@@ -6,14 +6,11 @@
 #include <optional>
 #include <memory>
 #include <string>
+#include <ctime>
 
 class HttpConnection : public IHttpConnection
 {
 private:
-	int _fd;
-	std::string _buffer;
-	size_t _headerSize;
-
 	typedef enum State
 	{
 		NEW,
@@ -22,7 +19,11 @@ private:
 		ERROR
 	} State;
 
+	int _fd;
+	std::string _buffer;
+	size_t _headerSize;
 	State _state;
+	time_t _lastActivityTime;
 	// TODO: At new version add this classses
 	// std::unique_ptr<IHttpReader> _reader;
 	// std::unique_ptr<IHttpWriter> _writer;
@@ -32,6 +33,7 @@ private:
 	bool reciveMessage();
 	bool isCompletedBody(size_t contentSize);
 	std::optional<size_t> getContentSize();
+	void _updateActivityTime();
 
 public:
 	HttpConnection() = delete;
@@ -45,6 +47,7 @@ public:
 	bool isCompleted() const override;
 	bool isWaiting() const override;
 	bool isError() const override;
+	bool isTimedOut(int timeoutSeconds) const;
 
     std::optional<HttpRequest> getRequest() override;
     void queueResponse(const HttpResponse& response) override;

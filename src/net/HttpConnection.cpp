@@ -5,17 +5,19 @@
 #include <unistd.h>
 #include <sstream>
 #include <cstdlib>
+#include <ctime>
 
 
 HttpConnection::HttpConnection(int fd)
-	: _fd(fd), _headerSize(std::string::npos), _state(NEW)
+	: _fd(fd), _buffer(), _headerSize(std::string::npos), _state(NEW), _lastActivityTime(std::time(NULL))
 {}
 
 HttpConnection::HttpConnection(const HttpConnection& other)
 	: _fd(other._fd),
 	_buffer(other._buffer),
 	_headerSize(other._headerSize),
-	_state(other._state)
+	_state(other._state),
+	_lastActivityTime(other._lastActivityTime)
 {}
 
 HttpConnection HttpConnection::operator=(const HttpConnection& other)
@@ -26,6 +28,7 @@ HttpConnection HttpConnection::operator=(const HttpConnection& other)
 		_buffer = other._buffer;
 		_state  = other._state;
 		_headerSize = other._headerSize;
+		_lastActivityTime = other._lastActivityTime;
 	}
 	return *this;
 }
@@ -35,9 +38,11 @@ HttpConnection::~HttpConnection()
 
 bool HttpConnection::reciveMessage()
 {
+	_updateActivityTime();
+
 	char buf[4096];
 	ssize_t n = 0;
-		
+
 	while (true)
 	{
 		n = ::recv(_fd, buf, sizeof(buf), 0);
@@ -137,6 +142,17 @@ bool HttpConnection::isError() const
 	return _state == ERROR;
 }
 
+void HttpConnection::_updateActivityTime()
+{
+	_lastActivityTime = std::time(NULL);
+}
+
+bool HttpConnection::isTimedOut(int timeoutSeconds) const
+{
+	time_t currentTime = std::time(NULL);
+	return (currentTime - _lastActivityTime) > timeoutSeconds;
+}
+
 // First Verstion of parsing for chatgpt Total vibecoded function
 // TODO: Rebuild it. Add special classes for parsing the messages.
 std::optional<HttpRequest> HttpConnection::getRequest() 
@@ -149,8 +165,9 @@ std::optional<HttpRequest> HttpConnection::getRequest()
 	return request;
 }
 
-void HttpConnection::queueResponse(const HttpResponse& response) 
+void HttpConnection::queueResponse(const HttpResponse& response)
 {
+	_updateActivityTime();
 
 	std::string raw = HttpSerializer::serialize(response);
 	write(_fd, raw.c_str(), raw.size());
