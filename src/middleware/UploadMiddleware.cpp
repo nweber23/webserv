@@ -1,4 +1,5 @@
 #include "middleware/UploadMiddleware.hpp"
+#include "MultipartParser.hpp"
 #include "Parsing.hpp"
 #include <fstream>
 #include <sstream>
@@ -81,10 +82,47 @@ bool UploadMiddleware::_handleUpload(const HttpRequest& request,
 		return true;
 	}
 
-	auto filename = _extractUploadPath(request);
-
 	mkdir(store.c_str(), 0755);
 
+	auto contentTypeIt = request.headers.find("Content-Type");
+	if (contentTypeIt != request.headers.end() &&
+		contentTypeIt->second.find("multipart/form-data") != std::string::npos)
+	{
+		std::map<std::string, MultipartPart> parts =
+			MultipartParser::parse(contentTypeIt->second, request.body);
+
+		if (parts.empty())
+		{
+			_setErrorResponse(response);
+			return true;
+		}
+
+		for (std::map<std::string, MultipartPart>::iterator it = parts.begin();
+			 it != parts.end(); ++it)
+		{
+			const MultipartPart& part = it->second;
+
+			if (part.filename.empty())
+				continue;
+
+			std::string fullPath = store + "/" + part.filename;
+			std::ofstream out(fullPath, std::ios::binary);
+			if (!out.is_open())
+			{
+				_setErrorResponse(response);
+				return true;
+			}
+			out.write(part.body.c_str(),
+					  static_cast<std::streamsize>(part.body.size()));
+			out.close();
+		}
+
+		std::string firstFile = store + "/" + parts.begin()->second.filename;
+		_setSuccessResponse(response, firstFile);
+		return true;
+	}
+
+	auto filename = _extractUploadPath(request);
 	std::string fullPath = store + "/" + filename;
 	std::ofstream out(fullPath, std::ios::binary);
 	if (!out.is_open())
