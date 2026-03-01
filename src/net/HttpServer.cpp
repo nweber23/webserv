@@ -11,7 +11,8 @@
 #include <iostream>
 #include <string>
 #include <cerrno>
-#define MAX_EVENTS 64
+#include <vector>
+#define MAX_EVENTS 2048
 
 
 HttpServer::HttpServer(
@@ -83,7 +84,7 @@ void HttpServer::_setup()
 	{
 		throw std::runtime_error("Error: can't create epoll object");
 	}
-	
+
 
 	auto ports = _config->listen_ports;
 	for(auto port : ports)
@@ -97,7 +98,7 @@ void HttpServer::_setup()
 		if (epoll_ctl(_epfd, EPOLL_CTL_ADD, fd, &event) < 0)
 		{
 			throw std::runtime_error("Error: can't add fd to epoll (epoll_ctl)");
-		}	
+		}
 	}
 }
 
@@ -120,13 +121,36 @@ void HttpServer::_initialConnection(int listenFd)
 void HttpServer::_closeConnectionOnError(int fd)
 {
 	HttpResponse  errorResponse;
-	
+
 	auto connection = _connections[fd];
 	_errorHandler->buildErrorResponse(InternalServerError, errorResponse);
 	connection->queueResponse(errorResponse);
 	epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
 	close(fd);
 	_connections.erase(fd);
+}
+
+void HttpServer::_checkForTimedOutConnections()
+{
+	const int TIMEOUT_SECONDS = 60;
+	std::vector<int> timedOutFds;
+
+	for (auto& pair : _connections)
+	{
+		int fd = pair.first;
+		auto connection = pair.second;
+		if (connection && connection->isTimedOut(TIMEOUT_SECONDS))
+		{
+			timedOutFds.push_back(fd);
+		}
+	}
+
+	for (int fd : timedOutFds)
+	{
+		epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+		close(fd);
+		_connections.erase(fd);
+	}
 }
 
 void HttpServer::_handleInited(int fd)
@@ -149,7 +173,7 @@ void HttpServer::_handleInited(int fd)
 			close(fd);
 			_connections.erase(fd);
 		}
-		else 
+		else
 		{
 			_closeConnectionOnError(fd);
 			return;
@@ -170,7 +194,7 @@ void HttpServer::_handleEpollQue(struct epoll_event *que, int size)
 		{
 			_initialConnection(fd);
 		}
-		else	
+		else
 		{
 			_handleInited(fd);
 		}
@@ -188,15 +212,19 @@ void HttpServer::run()
 
 	while (true)
 	{
-		int n = epoll_wait(_epfd, events, MAX_EVENTS, -1);
+		int n = epoll_wait(_epfd, events, MAX_EVENTS, 30000);
 		try
 		{
-			_handleEpollQue(events, n);
+			if (n > 0)
+			{
+				_handleEpollQue(events, n);
+			}
+			_checkForTimedOutConnections();
 		}
 		catch(const std::exception& e)
 		{
 			std::cout << "Error: " << e.what() << std::endl;
 		}
-	}	
+	}
 }
 
