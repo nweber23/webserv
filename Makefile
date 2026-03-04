@@ -54,7 +54,7 @@ $(OBJS_DIR)/%.o: $(SRCDIR)/%.cpp | $(OBJS_DIR)
 	for i in $$(seq 1 $$FILLED); do BAR="$$BAR█"; done; \
 	for i in $$(seq 1 $$EMPTY); do BAR="$$BAR░"; done; \
 	FILENAME=$$(basename $<); \
-	printf '\r\033[36m[%3d/%3d]\033[0m \033[33m%-40s\033[0m \033[36m%s\033[0m \033[32m%3d%%\033[0m' \
+	printf '\033[2K\r\033[36m[%3d/%3d]\033[0m \033[33m%-40s\033[0m \033[36m%s\033[0m \033[32m%3d%%\033[0m' \
 		"$$CURRENT" "$(TOTAL_FILES)" "$$FILENAME" "$$BAR" "$$PERCENT"
 	@$(CPP) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
@@ -87,7 +87,7 @@ $(TEST_OBJS_DIR)/%.o: $(TEST_DIR)/%.cpp | $(TEST_OBJS_DIR)
 	for i in $$(seq 1 $$FILLED); do BAR="$$BAR█"; done; \
 	for i in $$(seq 1 $$EMPTY); do BAR="$$BAR░"; done; \
 	FILENAME=$$(basename $<); \
-	printf '\r\033[36m[%3d/%3d]\033[0m \033[33m%-40s\033[0m \033[36m%s\033[0m \033[32m%3d%%\033[0m' \
+	printf '\033[2K\r\033[36m[%3d/%3d]\033[0m \033[33m%-40s\033[0m \033[36m%s\033[0m \033[32m%3d%%\033[0m' \
 		"$$CURRENT" "$$TOTAL" "$$FILENAME" "$$BAR" "$$PERCENT"
 	@$(CPP) $(CXXFLAGS) $(TEST_INCDIR) -c $< -o $@
 
