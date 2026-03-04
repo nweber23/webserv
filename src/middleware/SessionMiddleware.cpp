@@ -2,7 +2,6 @@
 
 #include "SessionStore.hpp"
 
-#include <sstream>
 #include <cstdlib>
 #include <ctime>
 #include <unistd.h>
@@ -34,20 +33,6 @@ std::string SessionMiddleware::_makeSid()
 	return sid;
 }
 
-std::string SessionMiddleware::_htmlEscape(const std::string& s)
-{
-	std::string out;
-	for (size_t i = 0; i < s.size(); ++i)
-	{
-		char c = s[i];
-		if (c == '&') out += "&amp;";
-		else if (c == '<') out += "&lt;";
-		else if (c == '>') out += "&gt;";
-		else if (c == '\"') out += "&quot;";
-		else out += c;
-	}
-	return out;
-}
 
 bool SessionMiddleware::handle(HttpRequest& request, HttpResponse& response)
 {
@@ -82,19 +67,5 @@ bool SessionMiddleware::handle(HttpRequest& request, HttpResponse& response)
 		response.headers["Set-Cookie"] = cookieHandler.buildSetCookieHeader("SID", sid, "/", "", true, false);
 	}
 
-	std::ostringstream body;
-	body << "<!doctype html><html><head><meta charset='utf-8'>";
-	body << "<title>Session Demo</title></head><body>";
-	body << "<h1>Session Demo</h1>";
-	body << "<p><b>SID</b>: " << _htmlEscape(sid) << "</p>";
-	body << "<p><b>Counter</b>: " << data.counter << "</p>";
-	body << "<p>Reload halaman ini untuk lihat counter naik. Hapus cookie SID untuk reset.</p>";
-	body << "</body></html>";
-
-	response.status = 200;
-	response.statusText = "OK";
-	response.body = body.str();
-	response.headers["Content-Type"] = "text/html";
-	response.headers["Content-Length"] = std::to_string(response.body.size());
-	return true;
+	return callNext(request, response);
 }
