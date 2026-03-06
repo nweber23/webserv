@@ -47,7 +47,7 @@ public:
 	bool isCompleted() const override;
 	bool isWaiting() const override;
 	bool isError() const override;
-	bool isTimedOut(int timeoutSeconds) const;
+	bool isTimedOut(int timeoutSeconds) const override;
 
     std::optional<HttpRequest> getRequest() override;
     void queueResponse(const HttpResponse& response) override;
