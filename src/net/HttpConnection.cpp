@@ -45,7 +45,7 @@ bool HttpConnection::reciveMessage()
 
 	while (true)
 	{
-		n = ::recv(_fd, buf, sizeof(buf), 0);
+		n = ::read(_fd, buf, sizeof(buf));
 		if (n > 0)
 		{
 			if (_buffer.size() + n > MAX_BUFFER_SIZE)
@@ -56,12 +56,10 @@ bool HttpConnection::reciveMessage()
 			_buffer.append(buf, buf + n);
 			continue;
 		}
-		else if (n == 0 || (errno == EAGAIN || errno == EWOULDBLOCK))
+		else if (n == 0)
 		{
 			break;
 		}
-		_state = HttpConnection::ERROR;
-		return false;
 	}
 	_headerSize = _buffer.find("\r\n\r\n");
 	if (_headerSize == std::string::npos)

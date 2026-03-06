@@ -132,7 +132,7 @@ void HttpServer::_closeConnectionOnError(int fd)
 
 void HttpServer::_checkForTimedOutConnections()
 {
-	const int TIMEOUT_SECONDS = 60;
+	const int TIMEOUT_SECONDS = 10;
 	std::vector<int> timedOutFds;
 
 	for (auto& pair : _connections)
