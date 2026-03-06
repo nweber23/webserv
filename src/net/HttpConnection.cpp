@@ -142,7 +142,8 @@ bool HttpConnection::isError() const
 
 void HttpConnection::_updateActivityTime()
 {
-	_lastActivityTime = std::time(NULL);
+	if (_state != WAITING)
+		_lastActivityTime = std::time(NULL);
 }
 
 bool HttpConnection::isTimedOut(int timeoutSeconds) const
