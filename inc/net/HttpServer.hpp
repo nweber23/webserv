@@ -32,6 +32,7 @@ private:
 	void _handleEpollQue(struct epoll_event *que, int size);
 	void _closeConnectionOnError(int fd);
 	void _checkForTimedOutConnections();
+	void closeConnection(int fd);
 
 public:
 	HttpServer() = delete;
