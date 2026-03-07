@@ -64,7 +64,7 @@ bool HttpConnection::reciveMessage()
 	}
 	if (n == 0 && _buffer.empty())
 	{
-		_state == HttpConnection::TOCLOSE;
+		_state = HttpConnection::TOCLOSE;
 		return false;
 	}
 	_headerSize = _buffer.find("\r\n\r\n");
