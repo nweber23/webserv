@@ -56,10 +56,16 @@ bool HttpConnection::reciveMessage()
 			_buffer.append(buf, buf + n);
 			continue;
 		}
-		else if (n == 0)
+		if (n == -1)
 		{
-			break;
+			_state = HttpConnection::ERROR;
+			return false;
 		}
+	}
+	if (n == 0 && _buffer.empty())
+	{
+		_state == HttpConnection::TOCLOSE;
+		return false;
 	}
 	_headerSize = _buffer.find("\r\n\r\n");
 	if (_headerSize == std::string::npos)
@@ -138,6 +144,11 @@ bool HttpConnection::isWaiting() const
 bool HttpConnection::isError() const
 {
 	return _state == ERROR;
+}
+
+bool HttpConnection::isToClose() const
+{
+	return _state == TOCLOSE;
 }
 
 void HttpConnection::_updateActivityTime()
