@@ -3,7 +3,7 @@
 
 #include "IMiddleware.hpp"
 #include "AMiddleware.hpp"
-#include "ErrorPageHandler.hpp"
+#include "handler/ErrorPageHandler.hpp"
 
 class NotFoundMiddleware : public AMiddleware
 {

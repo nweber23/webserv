@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AMiddleware.hpp"
-#include "ErrorPageHandler.hpp"
+#include "handler/ErrorPageHandler.hpp"
 
 #include <string>
 #include <vector>
