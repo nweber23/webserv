@@ -61,6 +61,7 @@ bool HttpConnection::reciveMessage()
 			_state = HttpConnection::ERROR;
 			return false;
 		}
+		break;
 	}
 	if (n == 0 && _buffer.empty())
 	{
