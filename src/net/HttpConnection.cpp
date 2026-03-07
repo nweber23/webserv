@@ -45,7 +45,7 @@ bool HttpConnection::reciveMessage()
 
 	while (true)
 	{
-		n = ::read(_fd, buf, sizeof(buf));
+		n = ::recv(_fd, buf, sizeof(buf), 0);
 		if (n > 0)
 		{
 			if (_buffer.size() + n > MAX_BUFFER_SIZE)
@@ -55,11 +55,6 @@ bool HttpConnection::reciveMessage()
 			}
 			_buffer.append(buf, buf + n);
 			continue;
-		}
-		if (n == -1)
-		{
-			_state = HttpConnection::ERROR;
-			return false;
 		}
 		break;
 	}
