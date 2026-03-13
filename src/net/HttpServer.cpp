@@ -186,7 +186,7 @@ void HttpServer::_handleInited(int fd)
 	{
 		closeConnection(fd);
 	}
-	if (connection->isError())
+	else if (connection->isError())
 	{
 		_closeConnectionOnError(fd);
 	}
