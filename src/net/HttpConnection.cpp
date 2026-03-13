@@ -149,8 +149,7 @@ bool HttpConnection::isToClose() const
 
 void HttpConnection::_updateActivityTime()
 {
-	if (_state != WAITING)
-		_lastActivityTime = std::time(NULL);
+	_lastActivityTime = std::time(NULL);
 }
 
 bool HttpConnection::isTimedOut(int timeoutSeconds) const
@@ -159,8 +158,6 @@ bool HttpConnection::isTimedOut(int timeoutSeconds) const
 	return (currentTime - _lastActivityTime) > timeoutSeconds;
 }
 
-// First Verstion of parsing for chatgpt Total vibecoded function
-// TODO: Rebuild it. Add special classes for parsing the messages.
 std::optional<HttpRequest> HttpConnection::getRequest() 
 {
 	auto request = HttpParser::parse(_buffer);
