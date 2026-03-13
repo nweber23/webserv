@@ -86,11 +86,11 @@ void HttpServer::_setup()
 	}
 
 
-	auto ports = _config->listen_ports;
-	for(auto port : ports)
+	std::vector<std::string> ports = _config->listen_ports;
+	for(auto stringPort : ports)
 	{
-		auto portInt = std::stoi(port);
-		int fd = _setupSocket(portInt);
+		int port = std::stoi(stringPort);
+		int fd = _setupSocket(port);
 		_listenFds.insert(fd);
 		struct epoll_event event;
 		event.events = EPOLLIN;
@@ -122,23 +122,21 @@ void HttpServer::_closeConnectionOnError(int fd)
 {
 	HttpResponse  errorResponse;
 
-	auto connection = _connections[fd];
+	std::shared_ptr<IHttpConnection> connection = _connections[fd];
 	_errorHandler->buildErrorResponse(InternalServerError, errorResponse);
 	connection->queueResponse(errorResponse);
-	epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
-	close(fd);
-	_connections.erase(fd);
+	closeConnection(fd);
 }
 
 void HttpServer::_checkForTimedOutConnections()
 {
-	const int TIMEOUT_SECONDS = 60;
+	const int TIMEOUT_SECONDS = 10;
 	std::vector<int> timedOutFds;
 
 	for (auto& pair : _connections)
 	{
 		int fd = pair.first;
-		auto connection = pair.second;
+		std::shared_ptr<IHttpConnection> connection = pair.second;
 		if (connection && connection->isTimedOut(TIMEOUT_SECONDS))
 		{
 			timedOutFds.push_back(fd);
@@ -153,25 +151,30 @@ void HttpServer::_checkForTimedOutConnections()
 	}
 }
 
+void HttpServer::closeConnection(int fd)
+{
+	epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+	close(fd);
+	_connections.erase(fd);
+}
+
 void HttpServer::_handleInited(int fd)
 {
 	if (_connections.find(fd) == _connections.end())
 		return;
 
-	auto connection = _connections[fd];
+	std::shared_ptr<IHttpConnection> connection = _connections[fd];
 	if (!connection || !_app)
 		return;
 
 	if (connection->readIntoBuffer())
 	{
-		auto request = connection->getRequest();
+		std::optional<HttpRequest> request = connection->getRequest();
 		if (request.has_value())
 		{
-			auto response = _app->handle(request.value());
+			HttpResponse response = _app->handle(request.value());
 			connection->queueResponse(response);
-			epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
-			close(fd);
-			_connections.erase(fd);
+			closeConnection(fd);
 		}
 		else
 		{
@@ -179,7 +182,11 @@ void HttpServer::_handleInited(int fd)
 			return;
 		}
 	}
-	if (connection->isError())
+	if (connection->isToClose())
+	{
+		closeConnection(fd);
+	}
+	else if (connection->isError())
 	{
 		_closeConnectionOnError(fd);
 	}

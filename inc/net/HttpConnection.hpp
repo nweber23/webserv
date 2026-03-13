@@ -16,7 +16,8 @@ private:
 		NEW,
 		WAITING,
 		HANDLED,
-		ERROR
+		ERROR,
+		TOCLOSE,
 	} State;
 
 	int _fd;
@@ -48,6 +49,7 @@ public:
 	bool isWaiting() const override;
 	bool isError() const override;
 	bool isTimedOut(int timeoutSeconds) const override;
+	bool isToClose() const override;
 
     std::optional<HttpRequest> getRequest() override;
     void queueResponse(const HttpResponse& response) override;

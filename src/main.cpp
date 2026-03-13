@@ -11,7 +11,7 @@
 #include "middleware/NotFoundMiddleware.hpp"
 #include "middleware/CookieMiddleware.hpp"
 #include "middleware/SessionMiddleware.hpp"
-#include "ErrorPageHandler.hpp"
+#include "handler/ErrorPageHandler.hpp"
 
 #include <iostream>
 #include <memory>

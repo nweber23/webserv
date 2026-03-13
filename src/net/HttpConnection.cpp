@@ -56,11 +56,11 @@ bool HttpConnection::reciveMessage()
 			_buffer.append(buf, buf + n);
 			continue;
 		}
-		else if (n == 0 || (errno == EAGAIN || errno == EWOULDBLOCK))
-		{
-			break;
-		}
-		_state = HttpConnection::ERROR;
+		break;
+	}
+	if (n == 0 && _buffer.empty())
+	{
+		_state = HttpConnection::TOCLOSE;
 		return false;
 	}
 	_headerSize = _buffer.find("\r\n\r\n");
@@ -142,6 +142,11 @@ bool HttpConnection::isError() const
 	return _state == ERROR;
 }
 
+bool HttpConnection::isToClose() const
+{
+	return _state == TOCLOSE;
+}
+
 void HttpConnection::_updateActivityTime()
 {
 	_lastActivityTime = std::time(NULL);
@@ -153,8 +158,6 @@ bool HttpConnection::isTimedOut(int timeoutSeconds) const
 	return (currentTime - _lastActivityTime) > timeoutSeconds;
 }
 
-// First Verstion of parsing for chatgpt Total vibecoded function
-// TODO: Rebuild it. Add special classes for parsing the messages.
 std::optional<HttpRequest> HttpConnection::getRequest() 
 {
 	auto request = HttpParser::parse(_buffer);

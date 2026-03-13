@@ -3,7 +3,7 @@
 #include "IHttpConnection.hpp"
 #include "IHttpServer.hpp"
 #include "IHttpApp.hpp"
-#include "ErrorPageHandler.hpp"
+#include "handler/ErrorPageHandler.hpp"
 #include "Parsing.hpp"
 #include <sys/epoll.h>
 #include <memory>
@@ -32,6 +32,7 @@ private:
 	void _handleEpollQue(struct epoll_event *que, int size);
 	void _closeConnectionOnError(int fd);
 	void _checkForTimedOutConnections();
+	void closeConnection(int fd);
 
 public:
 	HttpServer() = delete;

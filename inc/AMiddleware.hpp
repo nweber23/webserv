@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IMiddleware.hpp"
-#include "ErrorPageHandler.hpp"
+#include "handler/ErrorPageHandler.hpp"
 
 // TODO: Is this constructors okay?? May be not. Check in the next versions
 class AMiddleware : public IMiddleware

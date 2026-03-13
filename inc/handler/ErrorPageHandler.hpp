@@ -5,6 +5,7 @@
 #include "Parsing.hpp"
 #include "HttpResponse.hpp"
 
+#include <optional>
 
 typedef enum ErrorCode
 {
@@ -35,6 +36,7 @@ private:
     std::string readFile(const std::string& path);
     std::string generateDefaultPage(int statusCode);
 	std::string _getErrorPage(int statusCode);
+	std::optional<int> tryGetCode(std::string);
 	int _mapErrorCode(ErrorCode errorCode);
 
 	void _buildErrorResponseInternal(int statusCode, HttpResponse& response);

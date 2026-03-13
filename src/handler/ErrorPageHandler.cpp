@@ -1,4 +1,4 @@
-#include "ErrorPageHandler.hpp"
+#include "handler/ErrorPageHandler.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -8,14 +8,18 @@ ErrorPageHandler::ErrorPageHandler(const ServerConfig& config)
 {
 	initDefaultStatusTexts();
 
-	// Load custom pages from config (key is string like "404", value is file path)
 	for (std::map<std::string, std::string>::const_iterator it = _config.error_pages.begin();
 		 it != _config.error_pages.end(); ++it)
 	{
 		std::istringstream iss(it->first);
-		int code;
-		if (iss >> code && iss.eof())
-			_customPages[code] = it->second;
+		std::optional<int> code;
+		std::string token;	
+		while (iss >> token)
+		{
+			code = tryGetCode(token);
+			if (code.has_value())
+				_customPages[code.value()] = it->second;
+		}
 	}
 }
 
@@ -31,6 +35,22 @@ void ErrorPageHandler::initDefaultStatusTexts()
 	_defaultStatusTexts[502] = "Bad Gateway";
 	_defaultStatusTexts[503] = "Service Unavailable";
 	_defaultStatusTexts[504] = "Gateway Timeout";
+}
+
+std::optional<int> ErrorPageHandler::tryGetCode(std::string token)
+{
+	try
+	{
+		std::size_t pos;
+		int code = std::stoi(token, &pos);
+		if (token[pos] == '\0')
+			return code;
+		return std::nullopt;
+	}
+	catch(const std::exception& e)
+	{
+		return std::nullopt;
+	}
 }
 
 void ErrorPageHandler::setErrorPagesDir(const std::string& dir)
