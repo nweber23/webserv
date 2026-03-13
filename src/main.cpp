@@ -15,6 +15,8 @@
 
 #include <iostream>
 #include <memory>
+#include <thread>
+#include <vector>
 
 int main(int argc, char** argv) {
 	std::string configPath = "config/test.conf";
@@ -23,6 +25,7 @@ int main(int argc, char** argv) {
 
 	try {
 		Config config(configPath);
+		std::vector<std::thread> threads;
 
 		for (const auto& serverCfg : config.getServers())
 		{
@@ -79,8 +82,13 @@ int main(int argc, char** argv) {
 				std::cout << " " << p;
 			std::cout << std::endl;
 
-			server->run(); // blocks — for multiple servers you'd use threads
+			threads.emplace_back([srv = std::move(server)]() mutable {
+				srv->run();
+			});
 		}
+
+		for (auto& t : threads)
+			t.join();
 	} catch (const std::exception& e) {
 		std::cerr << "Fatal: " << e.what() << std::endl;
 		return 1;
