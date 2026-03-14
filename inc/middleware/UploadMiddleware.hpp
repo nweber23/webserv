@@ -16,6 +16,9 @@ private:
 
 	std::string _extractUploadPath(const HttpRequest& request);
 	bool _saveData(const std::string &filename, const HttpRequest& request);
+	bool _verifyUpload(const std::string& tempPath, size_t expectedSize);
+	bool _atomicRename(const std::string& tempPath, const std::string& finalPath);
+	size_t _getContentLength(const HttpRequest& request);
 
 	void _setErrorResponse(HttpResponse& response);
 	void _setSuccessResponse(HttpResponse& response, std::string& fullPath);
