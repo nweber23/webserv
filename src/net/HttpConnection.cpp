@@ -173,5 +173,14 @@ void HttpConnection::queueResponse(const HttpResponse& response)
 	_updateActivityTime();
 
 	std::string raw = HttpSerializer::serialize(response);
-	write(_fd, raw.c_str(), raw.size());
+	ssize_t bytes_sent = write(_fd, raw.c_str(), raw.size());
+	if (bytes_sent < 0)
+	{
+		_state = HttpConnection::ERROR;
+	}
+	else if (bytes_sent < static_cast<ssize_t>(raw.size()))
+	{
+		// Partial write - data loss, mark as error
+		_state = HttpConnection::ERROR;
+	}
 }
