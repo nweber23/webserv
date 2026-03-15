@@ -39,9 +39,6 @@ bool SessionMiddleware::handle(HttpRequest& request, HttpResponse& response)
 	if (request.method != "GET" && request.method != "POST")
 		return callNext(request, response);
 
-	if (request.path != "/session" && request.path != "/demo/session")
-		return callNext(request, response);
-
 	CookieHandler cookieHandler;
 	std::string cookieHeader;
 	if (request.headers.find("Cookie") != request.headers.end())
