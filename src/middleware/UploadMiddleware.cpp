@@ -6,10 +6,45 @@
 #include <ctime>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdexcept>
 
 UploadMiddleware::UploadMiddleware(
 	std::shared_ptr<ErrorPageHandler> errorHandler) : AMiddleware(errorHandler)
 {}
+
+size_t UploadMiddleware::_getContentLength(const HttpRequest& request)
+{
+	auto it = request.headers.find("Content-Length");
+	if (it == request.headers.end())
+		return 0;
+	try {
+		return std::stoull(it->second);
+	} catch (...) {
+		return 0;
+	}
+}
+
+bool UploadMiddleware::_verifyUpload(const std::string& tempPath, size_t expectedSize)
+{
+	struct stat st;
+	if (stat(tempPath.c_str(), &st) != 0)
+		return false;
+
+	if (expectedSize > 0 && st.st_size != (long)expectedSize)
+		return false;
+
+	return true;
+}
+
+bool UploadMiddleware::_atomicRename(const std::string& tempPath, const std::string& finalPath)
+{
+	if (rename(tempPath.c_str(), finalPath.c_str()) != 0)
+	{
+		unlink(tempPath.c_str());
+		return false;
+	}
+	return true;
+}
 
 bool UploadMiddleware::handle(HttpRequest& request, HttpResponse& response)
 {
@@ -106,7 +141,9 @@ bool UploadMiddleware::_handleUpload(const HttpRequest& request,
 				continue;
 
 			std::string fullPath = store + "/" + part.filename;
-			std::ofstream out(fullPath, std::ios::binary);
+			std::string tempPath = fullPath + ".tmp";
+
+			std::ofstream out(tempPath, std::ios::binary);
 			if (!out.is_open())
 			{
 				_setErrorResponse(response);
@@ -114,7 +151,29 @@ bool UploadMiddleware::_handleUpload(const HttpRequest& request,
 			}
 			out.write(part.body.c_str(),
 					  static_cast<std::streamsize>(part.body.size()));
+			out.flush();
+
+			if (!out.good())
+			{
+				out.close();
+				unlink(tempPath.c_str());
+				_setErrorResponse(response);
+				return true;
+			}
 			out.close();
+
+			if (!_verifyUpload(tempPath, part.body.size()))
+			{
+				unlink(tempPath.c_str());
+				_setErrorResponse(response);
+				return true;
+			}
+
+			if (!_atomicRename(tempPath, fullPath))
+			{
+				_setErrorResponse(response);
+				return true;
+			}
 		}
 
 		std::string firstFile = store + "/" + parts.begin()->second.filename;
@@ -124,7 +183,9 @@ bool UploadMiddleware::_handleUpload(const HttpRequest& request,
 
 	auto filename = _extractUploadPath(request);
 	std::string fullPath = store + "/" + filename;
-	std::ofstream out(fullPath, std::ios::binary);
+	std::string tempPath = fullPath + ".tmp";
+
+	std::ofstream out(tempPath, std::ios::binary);
 	if (!out.is_open())
 	{
 		_setErrorResponse(response);
@@ -132,7 +193,29 @@ bool UploadMiddleware::_handleUpload(const HttpRequest& request,
 	}
 	out.write(request.body.c_str(),
 	          static_cast<std::streamsize>(request.body.size()));
+	out.flush();
+
+	if (!out.good())
+	{
+		out.close();
+		unlink(tempPath.c_str());
+		_setErrorResponse(response);
+		return true;
+	}
 	out.close();
+
+	if (!_verifyUpload(tempPath, request.body.size()))
+	{
+		unlink(tempPath.c_str());
+		_setErrorResponse(response);
+		return true;
+	}
+
+	if (!_atomicRename(tempPath, fullPath))
+	{
+		_setErrorResponse(response);
+		return true;
+	}
 
 	_setSuccessResponse(response, fullPath);
 	return true;
