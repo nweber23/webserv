@@ -73,11 +73,9 @@ Each layer has corresponding interface classes and implementations, enabling fle
 
 ## Resources
 
-HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110.html
-epoll Man Page: https://man7.org/linux/man-pages/man7/epoll.7.html
-HTTP Cookies: https://de.wikipedia.org/wiki/HTTP-Cookie
-
-AI Usage
+- HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110.html
+- epoll Man Page: https://man7.org/linux/man-pages/man7/epoll.7.html
+- HTTP Cookies: https://de.wikipedia.org/wiki/HTTP-Cookie
 
 AI was used for:
 - Answering questions about HTTP/RFC protocol specifications
