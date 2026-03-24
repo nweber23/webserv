@@ -1,6 +1,7 @@
 #include "net/HttpServer.hpp"
 #include "net/HttpConnection.hpp"
 
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <stdexcept>
 #include <sys/epoll.h>
@@ -45,7 +46,7 @@ void HttpServer::_setNonBlocking(int fd)
 	}
 }
 
-int HttpServer::_setupSocket(int listenPort)
+int HttpServer::_setupSocket(const std::string& address, int listenPort)
 {
 	int fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd < 0)
@@ -61,7 +62,9 @@ int HttpServer::_setupSocket(int listenPort)
 	sockaddr_in adress;
 
 	adress.sin_family = AF_INET;
-	adress.sin_addr.s_addr = htonl(INADDR_ANY);
+	adress.sin_addr.s_addr = inet_addr(address.c_str());
+	if (adress.sin_addr.s_addr == INADDR_NONE)
+		throw std::runtime_error("Error: invalid address: " + address);
 	adress.sin_port = htons(listenPort);
 
 	if (bind(fd, reinterpret_cast<struct sockaddr*>(&adress), sizeof(adress)) < 0)
@@ -86,11 +89,14 @@ void HttpServer::_setup()
 	}
 
 
-	std::vector<std::string> ports = _config->listen_ports;
-	for(auto stringPort : ports)
+	std::vector<std::string> listens = _config->listen_ports;
+	for(auto listen : listens)
 	{
-		int port = std::stoi(stringPort);
-		int fd = _setupSocket(port);
+		size_t colon = listen.find(':');
+		std::string address = (colon != std::string::npos) ? listen.substr(0, colon) : "0.0.0.0";
+		std::string port_str = (colon != std::string::npos) ? listen.substr(colon + 1) : listen;
+		int port = std::stoi(port_str);
+		int fd = _setupSocket(address, port);
 		_listenFds.insert(fd);
 		struct epoll_event event;
 		event.events = EPOLLIN;
