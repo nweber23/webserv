@@ -26,7 +26,7 @@ private:
 
 	void _setup();
 	void _setNonBlocking(int fd);
-	int  _setupSocket(int listenPort);
+	int  _setupSocket(const std::string& address, int listenPort);
 	void _initialConnection(int listenFd);
 	void _handleInited(int fd);
 	void _handleEpollQue(struct epoll_event *que, int size);

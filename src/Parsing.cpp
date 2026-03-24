@@ -173,9 +173,11 @@ size_t Config::parseSize(const std::string& str) {
 // Server directive handlers
 
 void Config::handleListen(std::vector<std::string>& tokens, size_t& index, ServerConfig& server) {
-  std::string port = getNextToken(tokens, index);
-  validatePort(port);
-  server.listen_ports.push_back(port);
+  std::string listen = getNextToken(tokens, index);
+  size_t colon = listen.find(':');
+  std::string port_str = (colon != std::string::npos) ? listen.substr(colon + 1) : listen;
+  validatePort(port_str);
+  server.listen_ports.push_back(listen);
   expectToken(tokens, index, ";");
 }
 
