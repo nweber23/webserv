@@ -7,6 +7,38 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdexcept>
+#include <cctype>
+
+static std::string urlDecode(const std::string& encoded)
+{
+	std::string decoded;
+	for (size_t i = 0; i < encoded.length(); ++i)
+	{
+		if (encoded[i] == '%' && i + 2 < encoded.length())
+		{
+			std::string hex = encoded.substr(i + 1, 2);
+			try
+			{
+				int code = std::stoi(hex, nullptr, 16);
+				decoded += static_cast<char>(code);
+				i += 2;
+			}
+			catch (...)
+			{
+				decoded += encoded[i];
+			}
+		}
+		else if (encoded[i] == '+')
+		{
+			decoded += ' ';
+		}
+		else
+		{
+			decoded += encoded[i];
+		}
+	}
+	return decoded;
+}
 
 UploadMiddleware::UploadMiddleware(
 	std::shared_ptr<ErrorPageHandler> errorHandler) : AMiddleware(errorHandler)
@@ -228,6 +260,8 @@ bool UploadMiddleware::_handleDelete(const HttpRequest& request,
 	std::string relPath = request.path.substr(request.location->path.size());
 	if (!relPath.empty() && relPath[0] == '/')
 		relPath.erase(0, 1);
+
+	relPath = urlDecode(relPath);
 
 	if (relPath.empty())
 	{

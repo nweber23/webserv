@@ -18,6 +18,7 @@ private:
 		HANDLED,
 		ERROR,
 		TOCLOSE,
+		PAYLOAD_TOO_LARGE,
 	} State;
 
 	int _fd;
@@ -30,6 +31,7 @@ private:
 	// std::unique_ptr<IHttpWriter> _writer;
 
 	static const size_t MAX_BUFFER_SIZE = 256 * 1024 * 1024; // 256 MB
+	static const size_t MAX_CONTENT_SIZE = 10 * 1024 * 1024; // 10 MB
 
 	bool reciveMessage();
 	bool isCompletedBody(size_t contentSize);
@@ -50,6 +52,7 @@ public:
 	bool isError() const override;
 	bool isTimedOut(int timeoutSeconds) const override;
 	bool isToClose() const override;
+	bool isPayloadTooLarge() const override;
 
     std::optional<HttpRequest> getRequest() override;
     void queueResponse(const HttpResponse& response) override;
