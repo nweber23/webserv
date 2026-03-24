@@ -117,6 +117,12 @@ bool HttpConnection::readIntoBuffer()
 		return false;
 	}
 
+	if (size.value() > MAX_CONTENT_SIZE)
+	{
+		_state = PAYLOAD_TOO_LARGE;
+		return false;
+	}
+
 	if (isCompletedBody(size.value()))
 	{
 		_state = HANDLED;
@@ -145,6 +151,11 @@ bool HttpConnection::isError() const
 bool HttpConnection::isToClose() const
 {
 	return _state == TOCLOSE;
+}
+
+bool HttpConnection::isPayloadTooLarge() const
+{
+	return _state == PAYLOAD_TOO_LARGE;
 }
 
 void HttpConnection::_updateActivityTime()

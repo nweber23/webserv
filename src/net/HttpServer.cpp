@@ -192,6 +192,13 @@ void HttpServer::_handleInited(int fd)
 	{
 		closeConnection(fd);
 	}
+	else if (connection->isPayloadTooLarge())
+	{
+		HttpResponse errorResponse;
+		_errorHandler->buildErrorResponse(PayloadTooLarge, errorResponse);
+		connection->queueResponse(errorResponse);
+		closeConnection(fd);
+	}
 	else if (connection->isError())
 	{
 		_closeConnectionOnError(fd);
