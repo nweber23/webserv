@@ -67,7 +67,7 @@ bool StaticFileMiddleware::generateDirectoryListing(
 	DIR* dir = opendir(dirPath.c_str());
 	if (!dir)
 	{
-		_errorHandler->buildErrorResponse(InternalServerError, response);
+		_errorHandler->buildErrorResponse(Forbidden, response);
 		return true;
 	}
 

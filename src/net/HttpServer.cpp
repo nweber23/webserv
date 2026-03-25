@@ -129,7 +129,7 @@ void HttpServer::_closeConnectionOnError(int fd)
 	HttpResponse  errorResponse;
 
 	std::shared_ptr<IHttpConnection> connection = _connections[fd];
-	_errorHandler->buildErrorResponse(InternalServerError, errorResponse);
+	_errorHandler->buildErrorResponse(BadRequest, errorResponse);
 	connection->queueResponse(errorResponse);
 	closeConnection(fd);
 }
